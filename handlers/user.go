@@ -20,30 +20,24 @@ import (
 // @Failure		500	{object}	response.Response{}
 // @Router			/user/signup    [POST]
 func UserSignup(c *gin.Context) {
-	// Declare a variable to hold the user sign-up details
-	var SignupDetails models.UserSignUp
-	// Bind JSON data from request body into signupDetail struct
-	if err := c.ShouldBindJSON(&SignupDetails); err != nil {
-		// Return a client response with status code 400 (Bad Request) and an error message
+	var SignupDetail models.UserSignUp
+	if err := c.ShouldBindJSON(&SignupDetail); err != nil {
 		errs := response.ClientResponse(http.StatusBadRequest, "Details not in correct format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errs)
 		return
 	}
-	// Validate signupDetail struct
-	err := validator.New().Struct(SignupDetails)
+	err := validator.New().Struct(SignupDetail)
 	if err != nil {
-		errs := response.ClientResponse(http.StatusBadRequest, "Constraints not satisfied", nil, err.Error())
+		errs := response.ClientResponse(http.StatusBadRequest, "Constraints not statisfied", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errs)
 		return
 	}
-	//Call usecase to sign up the user
-	user, err := usecase.UsersSignUp(SignupDetails)
+	user, err := usecase.UsersSignUp(SignupDetail)
 	if err != nil {
 		errs := response.ClientResponse(http.StatusBadRequest, "Details not in correct format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errs)
 		return
 	}
-	//Return a client response with status code 201 (Created) and a success message
-	success := response.ClientResponse(http.StatusCreated, "User successfully signed up", user, err.Error())
+	success := response.ClientResponse(http.StatusCreated, "User successfully signed up", user, nil)
 	c.JSON(http.StatusCreated, success)
 }

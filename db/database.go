@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/config"
+	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,5 +18,8 @@ func ConnectDatabase(confg config.Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database:%w", err)
 	}
 	DB = db
+	//db.AutoMigrate(&domain.Admin{})
+	db.AutoMigrate(&domain.User{})
+
 	return DB, err
 }

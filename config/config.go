@@ -27,27 +27,22 @@ type Config struct {
 var envs = []string{
 	"BASE_URL", "DB_HOST", "DB_NAME", "DB_USER", "DB_PORT", "DB_PASSWORD", "TWILIO_AUTHTOKEN", "TWILIO_ACCOUNTSID", "TWILIO_SERVICESID", "KEY", "KEY_ADMIN", "KEY_ID_FOR_PAY", "SECRET_KEY_FOR_PAY",
 }
-// LoadConfig loads configuration from environment variables
+
 func LoadConfig() (Config, error) {
-	var config Config
-	// Set up Viper to read from .env file in the current directory
+	var confg Config
 	viper.AddConfigPath("./")
 	viper.SetConfigFile(".env")
-	// Read the configuration file
 	viper.ReadInConfig()
-	// Bind environment variables
 	for _, env := range envs {
 		if err := viper.BindEnv(env); err != nil {
-			return config, err
+			return confg, err
 		}
 	}
-	// Unmarshal(Change to Go data structure) the configuration into the struct
-	if err := viper.Unmarshal(&config); err != nil {
-		return config, err
+	if err := viper.Unmarshal(&confg); err != nil {
+		return confg, err
 	}
-	// Validate the configuration
-	if err := validator.New().Struct(&config); err != nil {
-		return config, err
+	if err := validator.New().Struct(&confg); err != nil {
+		return confg, err
 	}
-	return config, nil
+	return confg, nil
 }

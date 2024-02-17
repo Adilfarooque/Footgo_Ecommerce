@@ -6,7 +6,7 @@ import (
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/config"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,7 +26,7 @@ func PasswordHash(password string) (string, error) {
 	return hash, nil
 }
 
-func GenrateTokenUsers(userID int, userEmail string, expirationTime time.Time) (string, error) {
+func GenerateTokenUsers(userID int, userEmail string, expirationTime time.Time) (string, error) {
 	cfg, _ := config.LoadConfig()
 	claims := &AuthUserClaims{
 		Id:    userID,
@@ -46,19 +46,33 @@ func GenrateTokenUsers(userID int, userEmail string, expirationTime time.Time) (
 
 func GenerateAccessToken(user models.UserDetailsResponse) (string, error) {
 	expirationTime := time.Now().Add(15 * time.Minute)
-	tokenString, err := GenrateTokenUsers(user.Id, user.Email, expirationTime)
+	tokenString, err := GenerateTokenUsers(user.Id, user.Email, expirationTime)
 	if err != nil {
 		return "", err
 	}
 	return tokenString, nil
 }
 
-func GenerateRefreshToken(user models.UserDetailsResponse)(string,error){
+func GenerateRefreshToken(user models.UserDetailsResponse) (string, error) {
 	expirationTime := time.Now().Add(24 * 90 * time.Hour)
-	tokenString, err := GenrateTokenUsers(user.Id, user.Email, expirationTime)
+	tokenString, err := GenerateTokenUsers(user.Id, user.Email, expirationTime)
 	if err != nil {
 		return "", err
 	}
 	return tokenString, nil
 }
-
+func CompareHashAndPassword(a string, b string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(a), []byte(b))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func PasswordHashing(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err != nil {
+		return "", errors.New("internal server error")
+	}
+	hash := string(hashedPassword)
+	return hash, nil
+}
