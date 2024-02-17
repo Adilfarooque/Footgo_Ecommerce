@@ -118,3 +118,12 @@ func NewWallect(userID int, amount float64) error {
 
 	return nil
 }
+
+func FindUserByEmail(user models.LoginDetail) (models.UserLoginResponse, error) {
+	var userDetails models.UserLoginResponse
+	err := db.DB.Raw("SELECT * FROM users WHERE email = ? AND blocked=false and isadmin=false", user.Email).Scan(&userDetails).Error
+	if err != nil {
+		return models.UserLoginResponse{}, err
+	}
+	return userDetails, nil
+}

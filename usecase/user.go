@@ -9,6 +9,8 @@ import (
 	"github.com/Adilfarooque/Footgo_Ecommerce/repository"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 	"github.com/google/uuid"
+	"github.com/jinzhu/copier"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func UsersSignUp(user models.UserSignUp) (*models.TokenUser, error) {
@@ -101,6 +103,42 @@ func UsersSignUp(user models.UserSignUp) (*models.TokenUser, error) {
 	}
 	return &models.TokenUser{
 		Users:        userData,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func UserLogin(user models.LoginDetail) (*models.TokenUser, error) {
+	email, err := repository.CheckUserExistsByEmail(user.Email)
+	if err != nil {
+		return &models.TokenUser{}, errors.New("error with server")
+	}
+	if email == nil {
+		return &models.TokenUser{}, errors.New("email doesn't exist")
+	}
+	userdetails, err := repository.FindUserByEmail(user)
+	if err != nil {
+		return &models.TokenUser{}, err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(userdetails.Password), []byte(user.Password))
+	if err != nil {
+		return &models.TokenUser{}, err
+	}
+	var userDetails models.UserDetailsResponse
+	err = copier.Copy(&userDetails, &userdetails)
+	if err != nil {
+		return &models.TokenUser{}, err
+	}
+	accessToken, err := helper.GenerateAccessToken(userDetails)
+	if err != nil {
+		return &models.TokenUser{}, errors.New("couldn't create accesstoken due to internal error")
+	}
+	refreshToken, err := helper.GenerateRefreshToken(userDetails)
+	if err != nil {
+		return &models.TokenUser{}, errors.New("couldn't create refreshtoken due to internal error")
+	}
+	return &models.TokenUser{
+		Users:        userDetails,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
