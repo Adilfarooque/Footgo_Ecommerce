@@ -23,6 +23,8 @@ func main() {
 	r := gin.Default()
 	//r.LoadHTMLGlob("template/*")
 	userGroup := r.Group("/user")
+	adminGroup := r.Group("/admin")
+	routes.AdminRoutes(adminGroup, db)
 	routes.UserRoutes(userGroup, db)
 
 	listenAdder := fmt.Sprintf("%s:%s", cfig.DBPort, cfig.DBHost)
