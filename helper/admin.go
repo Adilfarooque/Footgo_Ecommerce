@@ -35,3 +35,21 @@ func GenerateTokenAdmin(admin models.AdminDetailsResponse) (string, error) {
 	}
 	return tokenString, nil
 }
+
+
+func ValidateToken(tokenString string)(*authCustomClaimsAdmin,error){
+	cfg,_ := config.LoadConfig()
+	token,err := jwt.ParseWithClaims(tokenString,&authCustomClaimsAdmin{},func(token *jwt.Token) (interface{}, error) {
+		if _,ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil,fmt.Errorf("unexpected signing method :%v",token.Header["alg"])
+		}
+		return []byte(cfg.KEY_ADMIN),nil
+	})
+	if err != nil{
+		return nil,err
+	}
+	if claims, ok := token.Claims.(*authCustomClaimsAdmin); ok && token.Valid{
+		return claims,nil
+	}
+	return nil,fmt.Errorf("invalid token")
+}
