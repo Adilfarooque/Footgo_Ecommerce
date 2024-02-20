@@ -7,7 +7,7 @@ type AdminLogin struct {
 
 type AdminDetailsResponse struct {
 	ID        uint   `json:"id"`
-	Fristname string `json:"firstname"`
+	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 	Email     string `json:"email"`
 }

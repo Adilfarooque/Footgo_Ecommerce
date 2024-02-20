@@ -32,7 +32,5 @@ func ExtractUserIDFromToken(tokenString string) (int, string, error) {
 	if !ok {
 		return 0, "", fmt.Errorf("invalid token claims")
 	}
-
 	return claims.Id, claims.Email, nil
-
 }

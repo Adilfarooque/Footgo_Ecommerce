@@ -3,7 +3,7 @@ package domain
 import "github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 
 type Admin struct {
-	Id        uint   `json:"id" gorm:"uniquekey; not null"`
+	Id        uint   `json:"id" gorm:"uniquekey: not null"`
 	Firstname string `json:"firstname" gorm:"validate:required"`
 	Lastname  string `json:"lastname" gorm:"validate:required"`
 	Email     string `json:"email" gorm:"validate:required"`
