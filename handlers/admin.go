@@ -34,3 +34,23 @@ func LoginHandler(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Admin authenticate successfully", admin, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary		Admin Dashboard
+// @Description	Retrieve admin dashboard
+// @Tags			Admin
+// @Accept			json
+// @Produce		json
+// @Security		Bearer
+// @Success		200		{object}	response.Response{}
+// @Failure		500		{object}	response.Response{}
+// @Router			/admin/dashboard [GET]
+func DashBoard(c *gin.Context) {
+	adminDashboard, err := usecase.DashBoard()
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Dashboard could not be displayed", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Admin dashboard displayed", adminDashboard, nil)
+	c.JSON(http.StatusOK, success)
+}

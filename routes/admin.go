@@ -2,11 +2,18 @@ package routes
 
 import (
 	"github.com/Adilfarooque/Footgo_Ecommerce/handlers"
+	"github.com/Adilfarooque/Footgo_Ecommerce/middleware"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 	r.POST("adminlogin", handlers.LoginHandler)
+
+	r.Use(middleware.AdminAuthMiddleware())
+	{
+
+		r.GET("/dashboard", handlers.DashBoard)
+	}
 	return r
 }

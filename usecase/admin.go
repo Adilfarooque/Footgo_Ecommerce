@@ -20,7 +20,7 @@ func LoginHandler(adminDetails models.AdminLogin) (domain.TokenAdmin, error) {
 		return domain.TokenAdmin{}, err
 	}
 	var adminDetailsResponse models.AdminDetailsResponse
-	//  copy all details except password 
+	//  copy all details except password
 	err = copier.Copy(&adminDetailsResponse, &adminCompareDetails)
 	if err != nil {
 		return domain.TokenAdmin{}, err
@@ -38,3 +38,34 @@ func LoginHandler(adminDetails models.AdminLogin) (domain.TokenAdmin, error) {
 	}, nil
 }
 
+func DashBoard() (models.CompleteAdminDashboard, error) {
+	userDetails, err := repository.DashBoardUserDetails()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	productDetails, err := repository.DashBoardProductDetails()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	orderDetails, err := repository.DashBoardOrder()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	totalRevenue, err := repository.TotalRevenue()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	amountDetails, err := repository.AmountDetails()
+	if err != nil {
+		return models.CompleteAdminDashboard{}, err
+	}
+	
+	return models.CompleteAdminDashboard{
+		DashboardUser:    userDetails,
+		DashBoardProduct: productDetails,
+		DashBoardOrder:   orderDetails,
+		DashBoardRevenue: totalRevenue,
+		DashBoardAmount:  amountDetails,
+	}, nil
+
+}

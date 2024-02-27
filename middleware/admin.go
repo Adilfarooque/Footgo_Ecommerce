@@ -20,7 +20,7 @@ func AdminAuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
+		
 		splitted := strings.Split(tokenHeader, " ")
 		if len(splitted) != 2 {
 			response := response.ClientResponse(http.StatusUnauthorized, "Invalid token format", nil, nil)
