@@ -13,6 +13,7 @@ func UserRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 	products := r.Group("/products")
 	{
 		products.GET("", handlers.ShowAllProducts)
+		products.POST("/filter",handlers.FilterCategory)
 	}
 	return r
 }
