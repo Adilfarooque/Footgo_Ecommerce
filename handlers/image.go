@@ -18,6 +18,7 @@ import (
 // @Success 200 {object} response.Response{}
 // @Failure 500 {object} response.Response{}
 // @Router /user/products/image  [GET]
+/*
 func ShowImages(c *gin.Context) {
 	product_id := c.Query("product_id")
 	productID, err := strconv.Atoi(product_id)
@@ -33,5 +34,36 @@ func ShowImages(c *gin.Context) {
 		return
 	}
 	success := response.ClientResponse(http.StatusOK, "Successfully retrive image", image, err.Error())
+	c.JSON(http.StatusOK, success)
+}
+*/
+func ShowImages(c *gin.Context) {
+	// Retrieve the product_id query parameter from the request
+	product_id := c.Query("product_id")
+	if product_id == "" {
+		// If product_id is empty, return an error response indicating that it is required
+		errs := response.ClientResponse(http.StatusBadRequest, "product_id is required", nil, nil)
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+
+	// Convert the product_id string to an integer
+	productID, err := strconv.Atoi(product_id)
+	if err != nil {
+		// If there's an error in string conversion, return an error response
+		errs := response.ClientResponse(http.StatusInternalServerError, "error in string conversion", nil, err)
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	// Call the ShowImages use case function to retrieve images for the specified product ID
+	image, err := usecase.ShowImages(productID)
+	if err != nil {
+		// If there's an error retrieving images, return an error response
+		errs := response.ClientResponse(http.StatusBadGateway, "could not retrieve images", nil, err.Error())
+		c.JSON(http.StatusBadGateway, errs)
+		return
+	}
+	// Return a success response with the retrieved images
+	success := response.ClientResponse(http.StatusOK, "Successfully retrieve images", image, nil)
 	c.JSON(http.StatusOK, success)
 }
