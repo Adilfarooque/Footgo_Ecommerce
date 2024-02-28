@@ -16,6 +16,12 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		r.GET("/dashboard", handlers.DashBoard)
 		r.GET("/sales-report",handlers.FilteredSalesReport)
 		r.GET("/sales-report-date",handlers.SalesReportByDate)
+
+		users := r.Group("/users")
+		{
+			users.GET("",handlers.GetUsers)
+			
+		}
 	}
 	return r
 }

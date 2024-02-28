@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/usecase"
@@ -126,5 +127,43 @@ func SalesReportByDate(c *gin.Context) {
 	}
 
 	success := response.ClientResponse(http.StatusOK, "sales report retrieved successfully", report, nil)
+	c.JSON(http.StatusOK, success)
+}
+
+// @Summary		Get Users
+// @Description	Retrieve users with pagination
+// @Tags			Admin User Management
+// @Accept			json
+// @Produce		    json
+// @Security		Bearer
+// @Param page query string false "Page number"
+// @Param count query string false "Page size"
+// @Success		200		{object}	response.Response{}
+// @Failure		500		{object}	response.Response{}
+// @Router			/admin/users   [GET]
+
+func GetUsers(c *gin.Context) {
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "page number in right format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	countStr := c.DefaultQuery("count", "10")
+	pageSize, err := strconv.Atoi(countStr)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "user count in a page not in right format", nil, err.Error())
+		c.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+
+	users, err := usecase.ShowAllUsers(page, pageSize)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "couldn't retrieve users", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully Retrieved all Users", users, nil)
 	c.JSON(http.StatusOK, success)
 }

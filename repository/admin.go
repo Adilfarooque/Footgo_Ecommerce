@@ -147,3 +147,16 @@ func FilteredSalesReport(startTime time.Time, endTime time.Time) (models.SalesRe
 	}
 	return salesReport, nil
 }
+
+func ShowAllUsers(page, count int) ([]models.UserDetailsAtAdmin, error) {
+    var users []models.UserDetailsAtAdmin
+    if page <= 0 {
+        page = 1
+    }
+    offset := (page - 1) * count
+    err := db.DB.Raw("SELECT id, firstname, lastname, email, phone, blocked FROM users WHERE isadmin = 'false' LIMIT ? OFFSET ?", count, offset).Scan(&users).Error
+    if err != nil {
+        return nil, err
+    }
+    return users, nil
+}

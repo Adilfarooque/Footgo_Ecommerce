@@ -89,3 +89,11 @@ func ExicuteSalesReportByDate(startDate, endDate time.Time) (models.SalesReport,
 	}
 	return orders, nil
 }
+
+func ShowAllUsers(page, count int) ([]models.UserDetailsAtAdmin, error) {
+	users, err := repository.ShowAllUsers(page, count)
+	if err != nil {
+		return []models.UserDetailsAtAdmin{}, err
+	}
+	return users, nil
+}
