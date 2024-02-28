@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"errors"
+	"time"
+
 	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
 	"github.com/Adilfarooque/Footgo_Ecommerce/helper"
 	"github.com/Adilfarooque/Footgo_Ecommerce/repository"
@@ -77,4 +80,12 @@ func FilteredSalesReport(timePeriod string) (models.SalesReport, error) {
 		return models.SalesReport{}, err
 	}
 	return salesReport, nil
+}
+
+func ExicuteSalesReportByDate(startDate, endDate time.Time) (models.SalesReport, error) {
+	orders, err := repository.FilteredSalesReport(startDate, endDate)
+	if err != nil {
+		return models.SalesReport{}, errors.New("report fetching failed")
+	}
+	return orders, nil
 }
