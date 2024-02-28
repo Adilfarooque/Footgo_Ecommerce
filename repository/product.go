@@ -37,7 +37,7 @@ func CheckValidateCategory(data map[string]int) error {
 			return err
 		}
 		if count < 1 {
-			return errors.New("doesn't exist..")
+			return errors.New("doesn't exist")
 		}
 	}
 	return nil
