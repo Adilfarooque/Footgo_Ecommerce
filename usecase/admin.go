@@ -59,7 +59,7 @@ func DashBoard() (models.CompleteAdminDashboard, error) {
 	if err != nil {
 		return models.CompleteAdminDashboard{}, err
 	}
-	
+
 	return models.CompleteAdminDashboard{
 		DashboardUser:    userDetails,
 		DashBoardProduct: productDetails,
@@ -68,4 +68,13 @@ func DashBoard() (models.CompleteAdminDashboard, error) {
 		DashBoardAmount:  amountDetails,
 	}, nil
 
+}
+
+func FilteredSalesReport(timePeriod string) (models.SalesReport, error) {
+	starTime, endTime := helper.GetTimeFromPeriod(timePeriod)
+	salesReport, err := repository.FilteredSalesReport(starTime, endTime)
+	if err != nil {
+		return models.SalesReport{}, err
+	}
+	return salesReport, nil
 }

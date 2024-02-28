@@ -54,3 +54,26 @@ func DashBoard(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Admin dashboard displayed", adminDashboard, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary Filtered Sales Report
+// @Description Get Filtered sales report by week, month and year
+// @Tags Admin
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param period query string true "sales report"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/sales-report    [GET]
+
+func FilteredSalesReport(c *gin.Context) {
+	timePeriod := c.Query("period")
+	salesreport, err := usecase.FilteredSalesReport(timePeriod)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusInternalServerError, "sales report could not be retrieved", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errorRes)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "sales report retrieved successfully", salesreport, nil)
+	c.JSON(http.StatusOK, success)
+}

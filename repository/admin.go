@@ -117,3 +117,33 @@ func AmountDetails() (models.DashBoardAmount, error) {
 	}
 	return models.DashBoardAmount{}, nil
 }
+
+func FilteredSalesReport(startTime time.Time, endTime time.Time) (models.SalesReport, error) {
+	var salesReport models.SalesReport
+	result := db.DB.Raw("SELECT COALESCE(SUM(final_price),0) FROM orders WHERE payment_status='paid' AND approval = true AND created_at >= ? AND created_at <= ?", startTime, endTime).Scan(&salesReport.TotalSales)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	result = db.DB.Raw("SELECT COUNT(*) FROM orders").Scan(&salesReport.TotalOrders)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	result = db.DB.Raw("SELECT COUNT(*) FROM orders WHERE payment_status = 'paid' and approval = true and created_at >= ? AND created_at <= ?", startTime, endTime).Scan(&salesReport.CompletedOrders)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	result = db.DB.Raw("SELECT COUNT(*) FROM orders WHERE shipment_status = 'processing' AND approval = false AND created_at >= ? AND created_at<=?", startTime, endTime).Scan(&salesReport.PendingOrders)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	var productID int
+	result = db.DB.Raw("SELECT product_id FROM order_items GROUP BY product_id order by SUM(quantity) DESC LIMIT 1").Scan(&productID)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	result = db.DB.Raw("SELECT name FROM products WHERE id = ?", productID).Scan(&salesReport.TrendingProduct)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+	return salesReport, nil
+}
