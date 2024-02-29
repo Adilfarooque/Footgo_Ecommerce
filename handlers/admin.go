@@ -213,3 +213,40 @@ func UnBlockUser(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Successfully unblocked the user", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary Get Products Details
+// @Description Retrieve all product Details
+// @Tags Admin Product Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param page query string false "Page number"
+// @Param count query string false "Page Count"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/products   [GET]
+
+func ShowAllProductsFromAdmin(c *gin.Context) {
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "page number no in right format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	countStr := c.DefaultQuery("count", "10")
+	count, err := strconv.Atoi(countStr)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "page count not in right format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	products, err := usecase.ShowAllProductsFromAdmin(page, count)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Couldn't retrieve products", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully Retrieved all products", products, nil)
+	c.JSON(http.StatusOK, success)
+}

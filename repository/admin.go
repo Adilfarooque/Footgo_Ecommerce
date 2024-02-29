@@ -185,6 +185,7 @@ func GetUserByID(id string) (domain.User, error) {
 	}
 	return userDetails, nil
 }
+
 /*
 func UpdateBlockedUserByID(user domain.User) error {
 	err := db.DB.Raw("UPDATE users SET blocked = ? WHERE id = ?", user.Blocked, user.ID).Error
@@ -197,12 +198,26 @@ func UpdateBlockedUserByID(user domain.User) error {
 */
 
 func UpdateBlockedUserByID(user domain.User) error {
-    query := "UPDATE users SET blocked = ? WHERE id = ?"
-    err := db.DB.Exec(query, user.Blocked, user.ID).Error
-    if err != nil {
-        fmt.Printf("Error updating user with ID %d: %v\n", user.ID, err)
-        return err
-    }
-    fmt.Printf("User with ID %d successfully updated\n", user.ID)
-    return nil
+	query := "UPDATE users SET blocked = ? WHERE id = ?"
+	err := db.DB.Exec(query, user.Blocked, user.ID).Error
+	if err != nil {
+		fmt.Printf("Error updating user with ID %d: %v\n", user.ID, err)
+		return err
+	}
+	fmt.Printf("User with ID %d successfully updated\n", user.ID)
+	return nil
 }
+
+func ShowAllProductsFromAdmin(page, count int) ([]models.ProductBreif, error) {
+	if page == 0 {
+		page = 1
+	}
+	offset := (page - 1) * count
+	var ProductBreif []models.ProductBreif
+	err := db.DB.Raw("SELECT * FROM products LIMIT ? OFFSET ?", count, offset).Scan(&ProductBreif).Error
+	if err != nil {
+		return nil, err
+	}
+	return ProductBreif, nil
+}
+

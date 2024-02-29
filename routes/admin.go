@@ -23,6 +23,11 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			users.PUT("/blocked",handlers.BlockedUser)
 			users.PUT("/Unblock",handlers.UnBlockUser)
 		}
+
+		products := r.Group("/products")
+		{
+			products.GET("",handlers.ShowAllProductsFromAdmin)
+		}
 	}
 	return r
 }
