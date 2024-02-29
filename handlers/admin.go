@@ -190,3 +190,26 @@ func BlockedUser(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Successfully blocked the user", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary		UnBlock an existing user
+// @Description	UnBlock user
+// @Tags			Admin User Management
+// @Accept			json
+// @Produce		    json
+// @Security		Bearer
+// @Param			id	query		string	true	"user-id"
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/admin/users/unblock    [PUT]
+
+func UnBlockUser(c *gin.Context) {
+	id := c.Query("id")
+	err := usecase.UnBlockUser(id)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "user could not be unblocked", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully unblocked the user", nil, nil)
+	c.JSON(http.StatusOK, success)
+}
