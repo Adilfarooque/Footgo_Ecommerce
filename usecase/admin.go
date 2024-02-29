@@ -97,3 +97,21 @@ func ShowAllUsers(page, count int) ([]models.UserDetailsAtAdmin, error) {
 	}
 	return users, nil
 }
+
+func BlockedUser(id string) error {
+	user, err := repository.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+	if user.Blocked {
+		return errors.New("already blocked")
+	}
+
+	user.Blocked = true
+	
+	err = repository.UpdateBlockedUserByID(user)
+	if err != nil {
+		return err
+	}
+	return nil
+}

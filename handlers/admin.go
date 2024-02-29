@@ -167,3 +167,26 @@ func GetUsers(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Successfully Retrieved all Users", users, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary		Block User
+// @Description	using this handler admins can block an user
+// @Tags			Admin User Management
+// @Accept			json
+// @Produce		json
+// @Security		Bearer
+// @Param			id	query		string	true	"user-id"
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/admin/users/block   [PUT]
+
+func BlockedUser(c *gin.Context) {
+	id := c.Query("id")
+	err := usecase.BlockedUser(id)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "user could not be blocked", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully blocked the user", nil, nil)
+	c.JSON(http.StatusOK, success)
+}

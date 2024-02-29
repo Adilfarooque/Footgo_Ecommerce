@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/db"
@@ -149,14 +152,57 @@ func FilteredSalesReport(startTime time.Time, endTime time.Time) (models.SalesRe
 }
 
 func ShowAllUsers(page, count int) ([]models.UserDetailsAtAdmin, error) {
-    var users []models.UserDetailsAtAdmin
-    if page <= 0 {
-        page = 1
-    }
-    offset := (page - 1) * count
-    err := db.DB.Raw("SELECT id, firstname, lastname, email, phone, blocked FROM users WHERE isadmin = 'false' LIMIT ? OFFSET ?", count, offset).Scan(&users).Error
+	var users []models.UserDetailsAtAdmin
+	if page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * count
+	err := db.DB.Raw("SELECT id, firstname, lastname, email, phone, blocked FROM users WHERE isadmin = 'false' LIMIT ? OFFSET ?", count, offset).Scan(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func GetUserByID(id string) (domain.User, error) {
+	user_id, err := strconv.Atoi(id)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM users WHERE id = ?", user_id).Scan(&count).Error; err != nil {
+		return domain.User{}, err
+	}
+
+	if count < 1 {
+		return domain.User{}, errors.New("user for the given id does not exist")
+	}
+
+	var userDetails domain.User
+	if err := db.DB.Raw("SELECT * FROM users WHERE id = ?", user_id).Scan(&userDetails).Error; err != nil {
+		return domain.User{}, err
+	}
+	return userDetails, nil
+}
+/*
+func UpdateBlockedUserByID(user domain.User) error {
+	err := db.DB.Raw("UPDATE users SET blocked = ? WHERE id = ?", user.Blocked, user.ID).Error
+	if err != nil {
+		fmt.Println("Error updating user :", user)
+		return err
+	}
+	return nil
+}
+*/
+
+func UpdateBlockedUserByID(user domain.User) error {
+    query := "UPDATE users SET blocked = ? WHERE id = ?"
+    err := db.DB.Exec(query, user.Blocked, user.ID).Error
     if err != nil {
-        return nil, err
+        fmt.Printf("Error updating user with ID %d: %v\n", user.ID, err)
+        return err
     }
-    return users, nil
+    fmt.Printf("User with ID %d successfully updated\n", user.ID)
+    return nil
 }
