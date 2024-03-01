@@ -27,6 +27,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		products := r.Group("/products")
 		{
 			products.GET("",handlers.ShowAllProductsFromAdmin)
+			products.POST("",handlers.AddProducts)
 		}
 	}
 	return r

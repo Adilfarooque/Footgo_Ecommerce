@@ -5,8 +5,10 @@ import (
 	"strconv"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/usecase"
+	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/response"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 // @Summary Get Products Details to users
@@ -71,5 +73,81 @@ func FilterCategory(c *gin.Context) {
 		return
 	}
 	success := response.ClientResponse(http.StatusOK, "Successfully filtered the category", productCategory, nil)
+	c.JSON(http.StatusOK, success)
+}
+
+// @Summary Get Products Details
+// @Description Retrieve all product Details
+// @Tags Admin Product Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param page query string false "Page number"
+// @Param count query string false "Page Count"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/products   [GET]
+
+func ShowAllProductsFromAdmin(c *gin.Context) {
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "page number no in right format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	countStr := c.DefaultQuery("count", "10")
+	count, err := strconv.Atoi(countStr)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "page count not in right format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	products, err := usecase.ShowAllProductsFromAdmin(page, count)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Couldn't retrieve products", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully Retrieved all products", products, nil)
+	c.JSON(http.StatusOK, success)
+}
+
+// @Summary Add Products
+// @Description Add product from admin side
+// @Tags Admin Product Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param product body models.Product true "Product details"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/products [POST]
+
+func AddProducts(c *gin.Context) {
+	var product models.Product
+	if err := c.ShouldBindJSON(&product); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	err := validator.New().Struct(product)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Constraints not satisfied", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	if product.Stock < 1 {
+		errs := response.ClientResponse(http.StatusBadRequest, "Invalid stock", nil, nil)
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	products, err := usecase.AddProducts(product)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Could not add the product", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully added products", products, nil)
 	c.JSON(http.StatusOK, success)
 }

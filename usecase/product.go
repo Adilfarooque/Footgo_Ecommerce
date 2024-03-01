@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 
+	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
 	"github.com/Adilfarooque/Footgo_Ecommerce/repository"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 )
@@ -147,4 +148,67 @@ func FilterCategory(data map[string]int) ([]models.ProductBreif, error) {
 	}
 	// Return updated product details and nil error
 	return updatedproductDetails, nil
+}
+
+func ShowAllProductsFromAdmin(page, count int) ([]models.ProductBreif, error) {
+	productDetails, err := repository.ShowAllProductsFromAdmin(page, count)
+	if err != nil {
+		return []models.ProductBreif{}, err
+	}
+	for i := range productDetails {
+		p := &productDetails[i]
+		if p.Stock <= 0 {
+			p.ProductStatus = "out of stock"
+		} else {
+			p.ProductStatus = "in stock"
+		}
+	}
+
+	for j := range productDetails {
+		discount_percentage, err := repository.FindDiscountPercentageForProduct(int(productDetails[j].ID))
+		if err != nil {
+			return []models.ProductBreif{}, errors.New("there was some error in finding the discounted prices")
+		}
+		var discount float64
+		if discount_percentage > 0 {
+			discount = (productDetails[j].Price * float64(discount_percentage)) / 100
+		}
+		productDetails[j].DiscountedPrice = productDetails[j].Price - discount
+
+		discount_percentageCategory, err := repository.FindDiscountPercentageForCategory(int(productDetails[j].CatergoryID))
+		if err != nil {
+			return []models.ProductBreif{}, errors.New("there was some error in finding the discounted prices")
+		}
+		var Catergorydiscount float64
+		if discount_percentageCategory > 0 {
+			Catergorydiscount = (productDetails[j].Price * float64(discount_percentageCategory)) / 100
+		}
+		productDetails[j].DiscountedPrice = productDetails[j].DiscountedPrice - Catergorydiscount
+	}
+	var updatedPorductDetails []models.ProductBreif
+	for _, p := range productDetails {
+		img, err := repository.GetImage(int(p.ID))
+		if err != nil {
+			return nil, err
+		}
+		p.Image = img
+		updatedPorductDetails = append(updatedPorductDetails, p)
+	}
+	return updatedPorductDetails, nil
+}
+
+func AddProducts(product models.Product) (domain.Product, error) {
+	exist := repository.ProductAlreadyExist(product.Name)
+	if exist {
+		return domain.Product{}, errors.New("product already exist")
+	}
+	productResponse, err := repository.AddProducts(product)
+	if err != nil {
+		return domain.Product{}, err
+	}
+	stock := repository.StockInvalid(productResponse.Name)
+	if !stock {
+		return domain.Product{}, errors.New("stock is invalid input")
+	}
+	return productResponse, nil
 }
