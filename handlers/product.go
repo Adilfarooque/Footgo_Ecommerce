@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -123,11 +124,16 @@ func ShowAllProductsFromAdmin(c *gin.Context) {
 // @Success 200 {object} response.Response{}
 // @Failure 500 {object} response.Response{}
 // @Router /admin/products [POST]
-
+/*
 func AddProducts(c *gin.Context) {
 	var product models.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
 		errs := response.ClientResponse(http.StatusBadRequest, "Fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	if product.Name == "" || product.Descritption == "" || product.CategoryID == 0 || product.Size == 0 || product.Stock == 0 || product.Price == 0 {
+		errs := response.ClientResponse(http.StatusBadRequest, "Required fields are missing", nil, nil)
 		c.JSON(http.StatusBadRequest, errs)
 		return
 	}
@@ -149,5 +155,47 @@ func AddProducts(c *gin.Context) {
 		return
 	}
 	success := response.ClientResponse(http.StatusOK, "Successfully added products", products, nil)
+	c.JSON(http.StatusOK, success)
+}
+*/
+
+func AddProducts(c *gin.Context) {
+	var product models.Product
+	if err := c.BindJSON(&product); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	// Log the received product for debugging
+	fmt.Printf("Received product: %+v\n", product)
+	// Check for required fields
+	if product.Name == "" || product.Description == "" || product.CategoryID == 0 || product.Size == 0 || product.Stock == 0 || product.Price == 0 {
+		errs := response.ClientResponse(http.StatusBadRequest, "Required fields are missing", nil, nil)
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	// Validate the product using a validator (if you're using one)
+	if err := validator.New().Struct(product); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Constraints not satisfied", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	// Additional check for stock
+	if product.Stock < 1 {
+		errs := response.ClientResponse(http.StatusBadRequest, "Invalid stock", nil, nil)
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	// Assuming AddProducts function returns the added products
+	addedProduct, err := usecase.AddProduct(product)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Could not add the product", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	// Log the added products for debugging
+	fmt.Printf("Added product: %+v\n", addedProduct)
+	// Respond with success
+	success := response.ClientResponse(http.StatusOK, "Successfully added products", addedProduct, nil)
 	c.JSON(http.StatusOK, success)
 }

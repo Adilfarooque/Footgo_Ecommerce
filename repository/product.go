@@ -65,17 +65,17 @@ func GetQuantityFromProductID(id int) (int, error) {
 
 func ProductAlreadyExist(Name string) bool {
 	var count int
-	if err := db.DB.Raw("SELECT COUNT(*) FROM products WHERE name = ?", Name).Scan(&count).Error; err != nil {
-		return false
-	}
-	return count > 0
+    if err := db.DB.Raw("SELECT COUNT(*) FROM products WHERE name = ?",Name).Scan(&count).Error; err != nil {
+        return false
+    }
+    return count > 0
 
 }
 
-func AddProducts(product models.Product) (domain.Product, error) {
+func AddProduct(product models.Product) (domain.Product, error) {
 	var p domain.Product
-	query := "INSERT INTO products (name, description,category_id,size,stock,price)VALUES($1, $2, $3, $4 ,$5 ,$6) RETURNING name,description,category_id,size,stock,price"
-	err := db.DB.Raw(query, product.Name, product.Descritption, product.CategoryID, product.Size, product.Stock, product.Price).Scan(&p).Error
+	query := "INSERT INTO products (name, description,category_id, size, stock, price) VALUES ($1, $2, $3, $4, $5) RETURNING name, description, category_id, size, stock, price"
+	err := db.DB.Raw(query, product.Name, product.Description, product.CategoryID, product.Size, product.Stock, product.Price).Scan(&p).Error
 	if err != nil {
 		log.Println(err.Error())
 		return domain.Product{}, err
@@ -89,10 +89,10 @@ func AddProducts(product models.Product) (domain.Product, error) {
 	return prodctResponse, nil
 }
 
-func StockInvalid(Name string) bool {
+func StockValid(Name string) bool {
 	var count int
-	if err := db.DB.Raw("SELECT SUM(stock) FROM products WHERE name = ? AND stock >= 0", Name).Scan(&count).Error; err != nil {
-		return false
-	}
-	return count > 0
+    if err := db.DB.Raw("SELECT SUM(stock) FROM products WHERE name = ? AND stock >= 0",Name).Scan(&count).Error; err != nil {
+        return false
+    }
+    return count > 0
 }

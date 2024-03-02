@@ -197,17 +197,16 @@ func ShowAllProductsFromAdmin(page, count int) ([]models.ProductBreif, error) {
 	return updatedPorductDetails, nil
 }
 
-func AddProducts(product models.Product) (domain.Product, error) {
+func AddProduct(product models.Product) (domain.Product, error) {
 	exist := repository.ProductAlreadyExist(product.Name)
 	if exist {
 		return domain.Product{}, errors.New("product already exist")
 	}
-	productResponse, err := repository.AddProducts(product)
+	productResponse, err := repository.AddProduct(product)
 	if err != nil {
 		return domain.Product{}, err
 	}
-	stock := repository.StockInvalid(productResponse.Name)
-	if !stock {
+	if !repository.StockValid(productResponse.Name) {
 		return domain.Product{}, errors.New("stock is invalid input")
 	}
 	return productResponse, nil
