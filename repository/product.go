@@ -65,16 +65,16 @@ func GetQuantityFromProductID(id int) (int, error) {
 
 func ProductAlreadyExist(Name string) bool {
 	var count int
-    if err := db.DB.Raw("SELECT COUNT(*) FROM products WHERE name = ?",Name).Scan(&count).Error; err != nil {
-        return false
-    }
-    return count > 0
+	if err := db.DB.Raw("SELECT COUNT(*) FROM products WHERE name = ?", Name).Scan(&count).Error; err != nil {
+		return false
+	}
+	return count > 0
 
 }
 
 func AddProduct(product models.Product) (domain.Product, error) {
 	var p domain.Product
-	query := "INSERT INTO products (name, description,category_id, size, stock, price) VALUES ($1, $2, $3, $4, $5) RETURNING name, description, category_id, size, stock, price"
+	query := "INSERT INTO products (name, description, category_id, size, stock, price) VALUES ($1, $2, $3, $4, $5, $6) RETURNING name, description, category_id, size, stock, price"
 	err := db.DB.Raw(query, product.Name, product.Description, product.CategoryID, product.Size, product.Stock, product.Price).Scan(&p).Error
 	if err != nil {
 		log.Println(err.Error())
@@ -91,8 +91,59 @@ func AddProduct(product models.Product) (domain.Product, error) {
 
 func StockValid(Name string) bool {
 	var count int
-    if err := db.DB.Raw("SELECT SUM(stock) FROM products WHERE name = ? AND stock >= 0",Name).Scan(&count).Error; err != nil {
-        return false
-    }
-    return count > 0
+	if err := db.DB.Raw("SELECT SUM(stock) FROM products WHERE name = ? AND stock >= 0", Name).Scan(&count).Error; err != nil {
+		return false
+	}
+	return count > 0
+}
+
+func CheckProductExist(productID int) (bool, error) {
+	var prd int
+	err := db.DB.Raw("SELECT COUNT(*) FROM products WHERE id = ?", productID).Scan(&prd).Error
+	if err != nil {
+		return false, err // Return false and the error
+	}
+	// If the product count is greater than 0, the product exists
+	return prd > 0, nil // Return true if prd > 0, otherwise false
+}
+
+/*
+	func UpdateProduct(productID int, stock int) (models.ProductUpdateReciever, error) {
+		if stock <= 0 {
+			return models.ProductUpdateReciever{}, errors.New("stock doesnot update invalid input")
+		}
+		if db.DB == nil {
+			return models.ProductUpdateReciever{}, errors.New("database connection is nil")
+		}
+		if err := db.DB.Exec("UPDATE products SET stock = stock + $1 WHERE id = $2", stock, productID).Error; err != nil {
+			return models.ProductUpdateReciever{}, err
+		}
+		var newdetails models.ProductUpdateReciever
+		var newQuantity int
+		if err := db.DB.Raw("SELECT stock FROM products WHERE id =?", productID).Scan(&newQuantity).Error; err != nil {
+			return models.ProductUpdateReciever{}, err
+		}
+		newdetails.ProductID = productID
+		newdetails.Stock = newQuantity
+		return newdetails, nil
+	}
+*/
+func UpdateProduct(productID int, stock int) (models.ProductUpdateReciever, error) {
+	if stock <= 0 {
+		return models.ProductUpdateReciever{}, errors.New("stock does not update invalid input")
+	}
+	if db.DB == nil {
+		return models.ProductUpdateReciever{}, errors.New("database connection is nil")
+	}
+	if err := db.DB.Exec("UPDATE products SET stock = stock + $1 WHERE id = $2", stock, productID).Error; err != nil {
+		return models.ProductUpdateReciever{}, err
+	}
+	var newdetails models.ProductUpdateReciever
+	var newQuantity int
+	if err := db.DB.Raw("SELECT stock FROM products WHERE id =?", productID).Scan(&newQuantity).Error; err != nil {
+		return models.ProductUpdateReciever{}, err
+	}
+	newdetails.ProductID = productID
+	newdetails.Stock = newQuantity
+	return newdetails, nil
 }

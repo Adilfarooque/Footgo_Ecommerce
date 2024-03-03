@@ -161,7 +161,7 @@ func AddProducts(c *gin.Context) {
 
 func AddProducts(c *gin.Context) {
 	var product models.Product
-	if err := c.BindJSON(&product); err != nil {
+	if err := c.ShouldBindJSON(&product); err != nil {
 		errs := response.ClientResponse(http.StatusBadRequest, "Fields provided are in wrong format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errs)
 		return
@@ -197,5 +197,35 @@ func AddProducts(c *gin.Context) {
 	fmt.Printf("Added product: %+v\n", addedProduct)
 	// Respond with success
 	success := response.ClientResponse(http.StatusOK, "Successfully added products", addedProduct, nil)
+	c.JSON(http.StatusOK, success)
+}
+
+// @Summary Update Products quantity
+// @Description Update quantity of already existing product
+// @Tags Admin Product Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param productUpdate body models.ProductUpdate true "Product details"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/products    [PUT]
+func UpdateProduct(c *gin.Context) {
+	var p models.ProductUpdate
+	if err := c.ShouldBindJSON(&p); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	fmt.Printf("Received product: %+v\n", p)
+	updateproduct, err := usecase.UpdateProduct(p.ProductID, p.Stock)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Could not update the product quantity", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	fmt.Printf("Added product: %+v\n", updateproduct)
+
+	success := response.ClientResponse(http.StatusOK, "Successfully updated the product quantity", updateproduct, nil)
 	c.JSON(http.StatusOK, success)
 }

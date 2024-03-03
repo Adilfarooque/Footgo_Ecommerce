@@ -211,3 +211,23 @@ func AddProduct(product models.Product) (domain.Product, error) {
 	}
 	return productResponse, nil
 }
+
+func UpdateProduct(productID int, stock int) (models.ProductUpdateReciever, error) {
+	if stock <= 0 {
+		return models.ProductUpdateReciever{}, errors.New("stock doesn't update invalid input")
+	}
+	result, err := repository.CheckProductExist(productID)
+	if err != nil {
+		return models.ProductUpdateReciever{}, err
+	}
+	if !result {
+		return models.ProductUpdateReciever{}, errors.New("there is no product as you mentioned")
+	}
+	newupdate, err := repository.UpdateProduct(productID, stock)
+	if err != nil {
+		return models.ProductUpdateReciever{}, err
+	}
+	return newupdate, nil
+}
+
+

@@ -20,7 +20,7 @@ type ProductBreif struct {
 type ProductReceiver struct {
 	Name         string  `json:"name"`
 	Descritption string  `json:"description"`
-	CategoryID   uint    `json:"category_id"`
+	Categoryid   uint     `json:"category_id"`
 	Size         int     `json:"size"`
 	Stock        int     `json:"stock"`
 	Price        float64 `json:"price"`
@@ -29,7 +29,7 @@ type ProductReceiver struct {
 type Product struct {
 	Name        string  `json:"name" validate:"required"`
 	Description string  `json:"description" validate:"required"`
-	CategoryID  uint    `json:"category_id" validate:"required"`
+	CategoryID  uint     `json:"category_id" validate:"required"`
 	Size        int     `json:"size" validate:"required"`
 	Stock       int     `json:"stock" validate:"required"`
 	Price       float64 `json:"price" validate:"required"`
@@ -45,11 +45,11 @@ type SetName struct {
 }
 
 type ProductUpdate struct {
-	ProductId int `json:"product_id"`
+	ProductID int `json:"product_id"`
 	Stock     int `json:"stock"`
 }
 
-type ProductUpdateReceiver struct {
+type ProductUpdateReciever struct {
 	ProductID int
 	Stock     int
 }
