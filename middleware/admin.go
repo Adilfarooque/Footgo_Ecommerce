@@ -12,7 +12,7 @@ import (
 
 func AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenHeader := c.GetHeader("Authentication")
+		tokenHeader := c.GetHeader("Authorization")
 		fmt.Println(tokenHeader, "this is the token header")
 		if tokenHeader == "" {
 			response := response.ClientResponse(http.StatusUnauthorized, "No auth header porvided", nil, nil)
@@ -20,7 +20,7 @@ func AdminAuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		splitted := strings.Split(tokenHeader, " ")
 		if len(splitted) != 2 {
 			response := response.ClientResponse(http.StatusUnauthorized, "Invalid token format", nil, nil)
