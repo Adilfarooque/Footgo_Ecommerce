@@ -30,6 +30,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			products.POST("",handlers.AddProducts)
 			products.PUT("",handlers.UpdateProduct)//Update the product Quantity
 			products.DELETE("",handlers.DeleteProudct)
+			products.GET("/search",handlers.SearchProduct)
 		}
 	}
 	return r

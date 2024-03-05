@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
 	"github.com/Adilfarooque/Footgo_Ecommerce/repository"
@@ -236,4 +237,22 @@ func DeleteProudct(id string) error {
 		return err
 	}
 	return nil
+}
+
+func SearchProductOnPrefix(prefix string) ([]models.ProductBreif, error) {
+	invenotoryList, err := repository.GetInventory(prefix)
+	if err != nil {
+		return nil, err
+	}
+
+	var filteredProducts []models.ProductBreif
+	for _, product := range invenotoryList {
+		if strings.HasPrefix(strings.ToLower(product.Name), strings.ToLower(prefix)) {
+			filteredProducts = append(filteredProducts, product)
+		}
+	}
+	if len(filteredProducts) == 0 {
+		return nil, errors.New("no items matching your keyword")
+	}
+	return filteredProducts, nil
 }

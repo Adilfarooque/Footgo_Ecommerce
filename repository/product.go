@@ -169,3 +169,17 @@ func DeleteProduct(id string) error {
 	// }
 	return nil
 }
+
+func GetInventory(prefix string) ([]models.ProductBreif, error) {
+	var productDetails []models.ProductBreif
+	query := `
+	SELECT i.*
+	FROM products i
+	LEFT JOIN categories c ON i.category_id = c.id
+	WHERE i.product_name ILIKE '%' || $1 || '%'
+    OR c.category ILIKE '%' || $1 || '%';`
+	if err := db.DB.Raw(query, prefix).Scan(&productDetails).Error; err != nil {
+		return []models.ProductBreif{}, err
+	}
+	return productDetails, nil
+}

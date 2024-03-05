@@ -252,3 +252,31 @@ func DeleteProudct(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Successfully deleted the product", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary Get Products Details
+// @Tags Admin Product Management
+// @Description Search for a product
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param prefix body models.SearchItems  true "Product details"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/products/search  [GET]
+func SearchProduct(c *gin.Context) {
+	var prefix models.SearchItems
+	if err := c.ShouldBindJSON(&prefix); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "fields are provided in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+
+	productDetails, err := usecase.SearchProductOnPrefix(prefix.ProductName)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusInternalServerError, "could not retrive products by prefix search", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errRes)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully retrived all details", productDetails, nil)
+	c.JSON(http.StatusOK, success)
+}
