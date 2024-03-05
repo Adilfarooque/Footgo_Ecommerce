@@ -229,3 +229,26 @@ func UpdateProduct(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Successfully updated the product quantity", updateproduct, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary Delete product
+// @Description Delete a product from the admin side
+// @Tags Admin Product Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id query string true "product id"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/products    [DELETE]
+
+func DeleteProudct(c *gin.Context) {
+	id := c.Query("id")
+	err := usecase.DeleteProudct(id)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Could not delete the specified products", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully deleted the product", nil, nil)
+	c.JSON(http.StatusOK, success)
+}

@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"log"
+	"strconv"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/db"
 	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
@@ -146,4 +147,25 @@ func UpdateProduct(productID int, stock int) (models.ProductUpdateReciever, erro
 	newdetails.ProductID = productID
 	newdetails.Stock = newQuantity
 	return newdetails, nil
+}
+
+func DeleteProduct(id string) error {
+	product_id, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM products WHERE id = ?", product_id).Scan(&count).Error; err != nil {
+		return err
+	}
+	if count < 1 {
+		return errors.New("product for given id does not exist")
+	}
+	if err := db.DB.Exec("DELETE FROM products WHERE id = ?", product_id).Error; err != nil {
+		return err
+	}
+	// if err := db.DB.Exec("DELETE FROM images WHERE product_id = ?", product_id).Error; err != nil {
+	// 	return err
+	// }
+	return nil
 }

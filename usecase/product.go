@@ -230,4 +230,10 @@ func UpdateProduct(productID int, stock int) (models.ProductUpdateReciever, erro
 	return newupdate, nil
 }
 
-
+func DeleteProudct(id string) error {
+	err := repository.DeleteProduct(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
