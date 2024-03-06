@@ -39,7 +39,7 @@ type Category struct {
 	Category string `json:"category"`
 }
 
-type SetName struct {
+type SetNewName struct {
 	Current string `json:"current"`
 	New     string `json:"new"`
 }

@@ -30,3 +30,18 @@ func AddCategory(category models.Category) (domain.Category, error) {
 	}
 	return categories, nil
 }
+
+func UpdateCategory(current string, new string)(domain.Category,error){
+	categries , err := repository.CheckCategory(current)
+	if err != nil{
+		return domain.Category{},err
+	}
+	if !categries {
+		return domain.Category{},errors.New("category doesn't exist")
+	}
+	newCategory , err := repository.UpdateCategory(current,new)
+	if err != nil{
+		return domain.Category{},err
+	}
+	return newCategory,nil
+}

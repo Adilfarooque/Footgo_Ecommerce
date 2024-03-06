@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/Adilfarooque/Footgo_Ecommerce/db"
 	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
@@ -38,4 +40,30 @@ func AddCategory(category models.Category) (domain.Category, error) {
 	}
 
 	return categoriesResponse, nil
+}
+
+func CheckCategory(current string) (bool, error) {
+	var count int
+	err := db.DB.Raw("SELECT COUNT(*) FROM categories WHERE category = ?", current).Scan(&count).Error
+	if err != nil {
+		return false, err
+	}
+	if count == 0 {
+		return false, err
+	}
+	return true, nil
+}
+
+func UpdateCategory(current string, new string) (domain.Category, error) {
+	if db.DB == nil {
+		return domain.Category{}, errors.New("database connection is nil")
+	}
+	if err := db.DB.Exec("UPDATE categories SET category = ? WHERE category = ?", new, current).Error; err != nil {
+		return domain.Category{}, err
+	}
+	var newCategory domain.Category
+	if err := db.DB.Raw("SELECT id,category FROM categories WHERE category = ?", new).Scan(&newCategory).Error; err != nil {
+		return domain.Category{}, nil
+	}
+	return newCategory, nil
 }
