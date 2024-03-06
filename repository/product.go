@@ -184,3 +184,10 @@ func GetInventory(prefix string) ([]models.ProductBreif, error) {
 	return productDetails, nil
 }
 
+func UpdateProductImage(productID int, url string) error {
+	err := db.DB.Exec("INSERT INTO images (product_id,url) VALUES($1,$2) RETURNING *", productID, url)
+	if err != nil {
+		return errors.New("error while insert to database")
+	}
+	return nil
+}

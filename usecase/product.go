@@ -2,9 +2,12 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
+	"mime/multipart"
 	"strings"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
+	"github.com/Adilfarooque/Footgo_Ecommerce/helper"
 	"github.com/Adilfarooque/Footgo_Ecommerce/repository"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 )
@@ -255,4 +258,18 @@ func SearchProductOnPrefix(prefix string) ([]models.ProductBreif, error) {
 		return nil, errors.New("no items matching your keyword")
 	}
 	return filteredProducts, nil
+}
+
+func UpdateProductImage(id int, file *multipart.FileHeader) error {
+	url, err := helper.AddImagesToS3(file)
+	if err != nil {
+		fmt.Println("error is s3", err)
+		return err
+	}
+	err = repository.UpdateProductImage(id, url)
+	if err != nil {
+		fmt.Println("error in updation", err)
+		return err
+	}
+	return nil
 }

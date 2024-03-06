@@ -280,3 +280,49 @@ func SearchProduct(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Successfully retrived all details", productDetails, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary Add Product Image
+// @Description Add product Product from admin side
+// @Tags Admin Product Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param product_id query int  true "Product_id"
+// @Param files formData file true "Image file to upload" collectionFormat "multi"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/products/upload-image 	[POST]
+
+func UploadImage(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("product_id"))
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "Parameter problem", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "Retrieving images from error", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+
+	files := form.File["files"]
+	if len(files) == 0 {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "No files provided", nil, nil)
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+	for _, file := range files {
+		err := usecase.UpdateProductImage(id, file)
+		if err != nil {
+			errorRes := response.ClientResponse(http.StatusBadRequest, "Could not change one or more images", nil, err.Error())
+			c.JSON(http.StatusBadRequest, errorRes)
+			return
+		}
+		success := response.ClientResponse(http.StatusBadRequest, "Successfully changed images", nil, nil)
+		c.JSON(http.StatusBadRequest, success)
+	}
+
+}
