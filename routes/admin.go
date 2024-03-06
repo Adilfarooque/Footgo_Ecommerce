@@ -33,6 +33,14 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			products.GET("/search", handlers.SearchProduct) //with product name
 			//products.PUT("/upload-image", handlers.UploadImage)
 		}
+
+		category := r.Group("/category")
+		{
+			category.GET("",handlers.GetCategory)
+		}
+
+
+
 	}
 	return r
 }
