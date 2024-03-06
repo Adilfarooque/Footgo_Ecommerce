@@ -37,6 +37,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		category := r.Group("/category")
 		{
 			category.GET("",handlers.GetCategory)
+			category.POST("",handlers.AddCategory)
 		}
 
 

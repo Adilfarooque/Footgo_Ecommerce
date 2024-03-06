@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/usecase"
+	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/response"
 	"github.com/gin-gonic/gin"
 )
@@ -26,5 +27,34 @@ func GetCategory(c *gin.Context) {
 		return
 	}
 	success := response.ClientResponse(http.StatusOK, "Display All Category", category, nil)
+	c.JSON(http.StatusOK, success)
+}
+
+// admin
+// @Summary		Add Category
+// @Description	Admin can add new categories for products
+// @Tags			Admin Category Management
+// @Accept			json
+// @Produce		    json
+// @Param			category	body	models.Category	true	"category"
+// @Security		Bearer
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/admin/category [POST]
+
+func AddCategory(c *gin.Context) {
+	var category models.Category
+	if err := c.ShouldBindJSON(&category); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "fields provided are in worng format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	cate, err := usecase.AddCategory(category)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Could not the Category", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully added Category", cate, nil)
 	c.JSON(http.StatusOK, success)
 }
