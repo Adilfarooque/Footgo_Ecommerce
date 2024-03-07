@@ -42,6 +42,10 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			category.DELETE("",handlers.DeleteCategory)
 		}
 
+		order := r.Group("/order")
+		{
+			order.GET("",handlers.GetAllOrderDetailsForAdmin)
+		}
 
 
 	}
