@@ -67,3 +67,18 @@ func UpdateCategory(current string, new string) (domain.Category, error) {
 	}
 	return newCategory, nil
 }
+
+func DeleteCategory(id int) error {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM categories WHERE id = ?", id).Scan(&count).Error; err != nil {
+		return err
+	}
+	if count < 1 {
+		return errors.New("category for given id does not exist")
+	}
+	if err := db.DB.Exec("DELETE FROM categories WHERE id = ?", id).Error; err != nil {
+		return err
+	}
+	return nil
+}
+

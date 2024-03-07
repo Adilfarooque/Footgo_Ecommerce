@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/usecase"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
@@ -87,3 +88,30 @@ func UpdateCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, success)
 }
 
+// @Summary		Delete Category
+// @Description	Admin can delete a category
+// @Tags			Admin Category Management
+// @Accept			json
+// @Produce		    json
+// @Param			id	query	string	true	"id"
+// @Security		Bearer
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/admin/category     [DELETE]
+
+func DeleteCategory(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("id"))
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadGateway, "fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	err = usecase.DeleteCategory(id)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "could not delete the specified category", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully delete the category", nil, nil)
+	c.JSON(http.StatusOK, success)
+}
