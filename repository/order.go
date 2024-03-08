@@ -26,3 +26,19 @@ func GetAllOrderDetailsBrief(page, count int) ([]models.CombainedOrderDetails, e
 	return orderDetails, nil
 }
 
+func GetShipmentStatus(order_id int) (string, error) {
+	var status string
+	err := db.DB.Raw("SELECT shipment_status FROM orders WHERE id = ?", order_id).Scan(&status).Error
+	if err != nil {
+		return "", err
+	}
+	return status, nil
+}
+
+func ApproveOrder(order_id int) error {
+	err := db.DB.Exec("UPDATE orders SET shipment_status = 'order placed' , approval = 'true' WHERE id = ?", order_id).Error
+	if err != nil {
+		return err
+	}
+	return err
+}

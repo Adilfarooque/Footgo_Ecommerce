@@ -133,3 +133,25 @@ func UnBlockUser(id string) error {
 	}
 	return nil
 }
+
+func ApproveOrder(order_id int) error {
+	ShipmentStatus, err := repository.GetShipmentStatus(order_id)
+	if err != nil {
+		return err
+	}
+	if ShipmentStatus == "cancelled" {
+		return errors.New("the order is cancelled, cannot approved it")
+	}
+	if ShipmentStatus == "pending" {
+		return errors.New("the order is pending,cannot approve it")
+	}
+	if ShipmentStatus == "Processing" {
+		err := repository.ApproveOrder(order_id)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	//if the shipment status is not processing or cancelled . Then it is defenetely cancelled.
+	return nil
+}

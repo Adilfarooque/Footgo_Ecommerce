@@ -12,3 +12,4 @@ func GetAllOrderDetailsForAdmin(page, pageSize int) ([]models.CombainedOrderDeta
 	}
 	return orderDetails, nil
 }
+

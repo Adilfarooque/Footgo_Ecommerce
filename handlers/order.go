@@ -45,3 +45,31 @@ func GetAllOrderDetailsForAdmin(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Order Details Retrived Successfully", allOrderDetails, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary Approve Order
+// @Description Approve Order from admin side which is in processing state
+// @Tags Admin Order Management
+// @Accept   json
+// @Produce  json
+// @Security Bearer
+// @Param    order_id   query   string   true    "Order ID"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/order/approve [GET]
+
+func ApproveOrder(c *gin.Context) {
+	orderId, err := strconv.Atoi(c.Query("order_id"))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "error from orderID", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	err = usecase.ApproveOrder(orderId)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Couldn't approved the order", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Order Approved Successfully", nil, nil)
+	c.JSON(http.StatusOK, success)
+}

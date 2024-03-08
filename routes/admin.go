@@ -36,17 +36,17 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 
 		category := r.Group("/category")
 		{
-			category.GET("",handlers.GetCategory)
-			category.POST("",handlers.AddCategory)
-			category.PUT("",handlers.UpdateCategory)
-			category.DELETE("",handlers.DeleteCategory)
+			category.GET("", handlers.GetCategory)
+			category.POST("", handlers.AddCategory)
+			category.PUT("", handlers.UpdateCategory)
+			category.DELETE("", handlers.DeleteCategory)
 		}
 
 		order := r.Group("/order")
 		{
-			order.GET("",handlers.GetAllOrderDetailsForAdmin)
+			order.GET("", handlers.GetAllOrderDetailsForAdmin)
+			order.GET("/approve", handlers.ApproveOrder)
 		}
-
 
 	}
 	return r
