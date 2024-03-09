@@ -213,3 +213,30 @@ func UnBlockUser(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Successfully unblocked the user", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary		Add Payment Method
+// @Description	Admin can add new payment methods
+// @Tags			Admin Payment Method
+// @Accept			json
+// @Produce		    json
+// @Security		Bearer
+// @Param			payment 	body		models.NewPaymentMethod	 true	"payment method"
+// @Success		200		{object}	response.Response{}
+// @Failure		500		{object}	response.Response{}
+// @Router			/admin/payment-method  [POST]
+func AdddPaymentMehod(c *gin.Context) {
+	var method models.NewPaymentMethod
+	if err := c.ShouldBindJSON(&method); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	pay, err := usecase.AdddPaymentMehod(method)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Could not add the payment method", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully added payment method", pay, nil)
+	c.JSON(http.StatusOK, success)
+}

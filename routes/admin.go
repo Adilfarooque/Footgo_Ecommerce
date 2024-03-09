@@ -49,6 +49,11 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			order.GET("/cancel",handlers.CancelOrderFromAdmin)
 		}
 
+		payment := r.Group("/payment-method")
+		{
+			payment.POST("",handlers.AdddPaymentMehod)
+		}
+
 	}
 	return r
 }

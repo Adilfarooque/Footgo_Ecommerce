@@ -221,3 +221,24 @@ func ShowAllProductsFromAdmin(page, count int) ([]models.ProductBreif, error) {
 	return ProductBreif, nil
 }
 
+func CheckifPaymentMethodAlreadyExists(payment string) (bool, error) {
+	var count int64
+	err := db.DB.Raw("SELECT COUNT(*) FROM payment_method WHERE payment_name = $1", payment).Scan(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func AdddPaymentMehod(paym models.NewPaymentMethod) (domain.PaymentMethod, error) {
+	var payment string
+	if err := db.DB.Raw("INSERT INTO payment_method (payment_name) VALUES(?) RETURNING payment_name", paym.PaymentName).Scan(&payment).Error; err != nil {
+		return domain.PaymentMethod{}, err
+	}
+	var paymentResponse domain.PaymentMethod
+	if err := db.DB.Raw("SELECT id,payment_name FROM payment_methodS WHERE payment_name = ?", payment).Scan(&paymentResponse).Error; err != nil {
+		return domain.PaymentMethod{}, err
+	}
+	return paymentResponse, nil
+
+}
