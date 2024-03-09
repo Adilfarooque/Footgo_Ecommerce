@@ -19,6 +19,10 @@ type FullOrderDetails struct {
 	OrederProductDetails []OrederProductDetails
 }
 
+type OrderProducts struct {
+	ProductId string `json:"id"`
+	Stock     int    `json:"stock"`
+}
 type CombainedOrderDetails struct {
 	OrederId       string  `json:"order_id"`
 	FinalPrice     float64 `json:"final_price"`

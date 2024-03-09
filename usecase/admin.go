@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
@@ -153,5 +154,49 @@ func ApproveOrder(order_id int) error {
 		return nil
 	}
 	//if the shipment status is not processing or cancelled . Then it is defenetely cancelled.
+	return nil
+}
+
+func CancelOrderFromAdmin(orderID int) error {
+	ok, err := repository.CheckOrderID(orderID)
+	fmt.Println(err)
+	if !ok {
+		return err
+	}
+	orderProduct, err := repository.GetProductDetailsFromAdmin(orderID)
+	if err != nil {
+		return err
+	}
+	err = repository.CancelOrders(orderID)
+	if err != nil {
+		return err
+	}
+	err = repository.UpdateStockOfProduct(orderProduct)
+	if err != nil {
+		return err
+	}
+	payment_status, err := repository.PaymetStatus(orderID)
+	if err != nil {
+		return err
+	}
+	amount, err := repository.TotalAmountFromOrder(orderID)
+	if err != nil {
+		return err
+	}
+	userID, err := repository.UserIDFromOrder(orderID)
+	if err != nil {
+		return err
+	}
+	if payment_status == "refunded" {
+		err := repository.UpdateAmountToWallet(userID, amount)
+		if err != nil {
+			return err
+		}
+		reason := "Amount credited for cancellation of order by admin"
+		err = repository.UpdateHistory(userID, orderID, amount, reason)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

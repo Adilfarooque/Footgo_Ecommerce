@@ -73,3 +73,30 @@ func ApproveOrder(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Order Approved Successfully", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary Cancel Order Admin
+// @Description Cancel Order from admin side
+// @Tags Admin Order Management
+// @Accept   json
+// @Produce  json
+// @Security Bearer
+// @Param order_id query string true "Order ID"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/order/cancel   [GET]
+func CancelOrderFromAdmin(c *gin.Context) {
+	order_id, err := strconv.Atoi(c.Query("order_id"))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "error from orderID", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	err = usecase.CancelOrderFromAdmin(order_id)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Couldn't cancel the order", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Order Cancel Successfully", nil, nil)
+	c.JSON(http.StatusOK, success)
+}

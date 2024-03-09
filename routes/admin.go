@@ -46,6 +46,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		{
 			order.GET("", handlers.GetAllOrderDetailsForAdmin)
 			order.GET("/approve", handlers.ApproveOrder)
+			order.GET("/cancel",handlers.CancelOrderFromAdmin)
 		}
 
 	}
