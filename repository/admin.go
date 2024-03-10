@@ -240,5 +240,5 @@ func AdddPaymentMehod(paym models.NewPaymentMethod) (domain.PaymentMethod, error
 		return domain.PaymentMethod{}, err
 	}
 	return paymentResponse, nil
-
 }
+
