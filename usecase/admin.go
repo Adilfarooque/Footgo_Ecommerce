@@ -201,7 +201,7 @@ func CancelOrderFromAdmin(orderID int) error {
 	return nil
 }
 
-func AdddPaymentMehod(payment models.NewPaymentMethod) (domain.PaymentMethod, error) {
+func AddPaymentMehod(payment models.NewPaymentMethod) (domain.PaymentMethod, error) {
 	exists, err := repository.CheckifPaymentMethodAlreadyExists(payment.PaymentName)
 	if err != nil {
 		return domain.PaymentMethod{}, err
@@ -209,9 +209,10 @@ func AdddPaymentMehod(payment models.NewPaymentMethod) (domain.PaymentMethod, er
 	if exists {
 		return domain.PaymentMethod{}, errors.New("payment method already exists")
 	}
-	paymentAdd, err := repository.AdddPaymentMehod(payment)
+	paymentAdd, err := repository.AddPaymentMehod(payment)
 	if err != nil {
 		return domain.PaymentMethod{}, err
 	}
 	return paymentAdd, nil
 }
+
