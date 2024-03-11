@@ -56,6 +56,11 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			payment.DELETE("",handlers.DeletePaymentMethod)
 		}
 
+		coupons := r.Group("/coupons")
+		{
+			coupons.POST("",handlers.AddCoupon)
+		}
+
 	}
 	return r
 }
