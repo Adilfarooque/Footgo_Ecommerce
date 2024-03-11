@@ -59,6 +59,8 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		coupons := r.Group("/coupons")
 		{
 			coupons.POST("",handlers.AddCoupon)
+			coupons.GET("",handlers.GetCoupon)
+			coupons.PATCH("",handlers.ExpireCoupon)
 		}
 
 	}

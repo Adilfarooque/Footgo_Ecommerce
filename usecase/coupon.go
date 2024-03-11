@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/Adilfarooque/Footgo_Ecommerce/repository"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 )
@@ -27,4 +29,28 @@ func AddCoupon(coupon models.AddCoupon) (string, error) {
 		return "", err
 	}
 	return "Successfully added the coupon", nil
+}
+
+func GetCoupon() ([]models.Coupon, error) {
+	coupons, err := repository.GetCoupon()
+	if err != nil {
+		return []models.Coupon{}, err
+	}
+	return coupons, nil
+}
+
+func ExpireCoupon(couponID int) error {
+	couponExist, err := repository.ExpireCoupon(couponID)
+	if err != nil {
+		return err
+	}
+	//if it exists expire it ,if already send back relevant message
+	if couponExist {
+		err = repository.CouponAlreadyExpired(couponID)
+		if err != nil{
+			return err
+		}
+		return nil
+	}
+	return errors.New("coupon does not exist")
 }
