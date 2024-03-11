@@ -223,3 +223,11 @@ func ListPaymentMethod() ([]domain.PaymentMethod, error) {
 	}
 	return categories, nil
 }
+
+func DeletePaymentMethod(id int) error {
+	err := repository.DeletePaymentMethod(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

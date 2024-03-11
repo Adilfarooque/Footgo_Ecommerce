@@ -250,3 +250,17 @@ func ListPaymentMethod() ([]domain.PaymentMethod, error) {
 	}
 	return list, nil
 }
+
+func DeletePaymentMethod(id int) error {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM payment_methods WHERE id = ?", id).Scan(&count).Error; err != nil {
+		return err
+	}
+	if count < 1 {
+		return errors.New("payment for given id does not exist")
+	}
+	if err := db.DB.Exec("DELETE FROM payment_methods WHERE id = ?", id).Error; err != nil {
+		return err
+	}
+	return nil
+}

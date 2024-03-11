@@ -261,3 +261,32 @@ func ListPaymentMethod(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Successfully got all payment methods", categories, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary		Delete Payment Method
+// @Description	Admin can add new payment methods
+// @Tags			Admin Payment Method
+// @Accept			json
+// @Produce		    json
+// @Security		Bearer
+// @Param			id	query	string	true	"id"
+// @Success		200		{object}	response.Response{}
+// @Failure		500		{object}	response.Response{}
+// @Router			/admin/payment-method  [DELETE]
+
+func DeletePaymentMethod(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("id"))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "field provided are wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+
+	err = usecase.DeletePaymentMethod(id)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusInternalServerError, "error in deleting data", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errRes)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully Deleted the PaymentMethod", nil, nil)
+	c.JSON(http.StatusOK, success)
+}

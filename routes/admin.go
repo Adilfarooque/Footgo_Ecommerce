@@ -53,6 +53,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		{
 			payment.POST("",handlers.AddPaymentMehod)
 			payment.GET("",handlers.ListPaymentMethod)
+			payment.DELETE("",handlers.DeletePaymentMethod)
 		}
 
 	}
