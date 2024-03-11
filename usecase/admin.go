@@ -216,3 +216,10 @@ func AddPaymentMehod(payment models.NewPaymentMethod) (domain.PaymentMethod, err
 	return paymentAdd, nil
 }
 
+func ListPaymentMethod() ([]domain.PaymentMethod, error) {
+	categories, err := repository.ListPaymentMethod()
+	if err != nil {
+		return []domain.PaymentMethod{}, err
+	}
+	return categories, nil
+}

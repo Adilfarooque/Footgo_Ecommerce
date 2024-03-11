@@ -52,7 +52,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		payment := r.Group("/payment-method")
 		{
 			payment.POST("",handlers.AddPaymentMehod)
-
+			payment.GET("",handlers.ListPaymentMethod)
 		}
 
 	}

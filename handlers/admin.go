@@ -241,3 +241,23 @@ func AddPaymentMehod(c *gin.Context) {
 	c.JSON(http.StatusOK, success)
 }
 
+// @Summary		Get Payment Method
+// @Description	Admin can add new payment methods
+// @Tags			Admin Payment Method
+// @Accept			json
+// @Produce		    json
+// @Security		Bearer
+// @Success		200		{object}	response.Response{}
+// @Failure		500		{object}	response.Response{}
+// @Router			/admin/payment-method  [GET]
+
+func ListPaymentMethod(c *gin.Context) {
+	categories, err := usecase.ListPaymentMethod()
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "fields provided are wrong format", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully got all payment methods", categories, nil)
+	c.JSON(http.StatusOK, success)
+}

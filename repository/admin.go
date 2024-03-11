@@ -242,3 +242,11 @@ func AddPaymentMehod(paym models.NewPaymentMethod) (domain.PaymentMethod, error)
 	return paymentResponse, nil
 }
 
+func ListPaymentMethod() ([]domain.PaymentMethod, error) {
+	var list []domain.PaymentMethod
+	err := db.DB.Raw("SELECT * FROM payment_methods").Scan(&list).Error
+	if err != nil {
+		return []domain.PaymentMethod{}, err
+	}
+	return list, nil
+}
