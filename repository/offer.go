@@ -68,3 +68,33 @@ func Getoffers() ([]domain.ProductOffer, error) {
 	}
 	return model, nil
 }
+
+func AddCategoryOffer(categoryOffer models.CategoryOfferReceiver) error {
+	var count int
+	err := db.DB.Raw("SELECT COUNT(*) FROM category_offers WHERE offer_name = ?", categoryOffer.OfferName).Scan(&count).Error
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return errors.New("the offer already exists")
+	}
+
+	count = 0
+	err = db.DB.Raw("SELECT COUNT(*) FROM category_offers WHERE category_id = ?", categoryOffer.CategoryID).Scan(&count).Error
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		err := db.DB.Exec("DELETE FROM category_offers WHERE category_id = ?", categoryOffer.CategoryID).Error
+		if err != nil {
+			return err
+		}
+	}
+	startDate := time.Now()
+	endDate := time.Now().Add(time.Hour * 24 * 5)
+	err = db.DB.Exec("INSERT INTO category_offers (category_id, offer_name, discount_percentage, start_date, end_date) VALUES (?, ?, ?, ?, ?)", categoryOffer.CategoryID, categoryOffer.OfferName, categoryOffer.DiscountPercentage, startDate, endDate).Error	
+	if err != nil{
+		return err
+	}
+	return nil
+}

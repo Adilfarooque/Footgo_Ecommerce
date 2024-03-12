@@ -68,6 +68,13 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			Productoffer.POST("", handlers.AddProductOffer)
 			Productoffer.GET("", handlers.GetProductOffer)
 		}
+		
+		Categoryoffer := r.Group("/categoryoffer")
+		{
+			Categoryoffer.POST("",handlers.AddCategoryoffer)
+			
+		}
+
 	}
 	return r
 }

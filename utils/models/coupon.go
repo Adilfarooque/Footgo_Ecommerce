@@ -25,7 +25,12 @@ type ProductOfferReciever struct {
 	DiscountPercentage int    `json:"discount_percentage" binding:"required"`
 }
 
+type CategoryOfferReceiver struct {
+	CategoryID         uint   `json:"category_id" binding:"required"`
+	OfferName          string `json:"offer_name" binding:"required"`
+	DiscountPercentage int    `json:"discount_percentage" binding:"required"`
+}
+
 type ReferralAmount struct {
 	ReferralAmount float64 `json:"referral_amount"`
 }
-

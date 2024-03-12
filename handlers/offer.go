@@ -65,3 +65,37 @@ func GetProductOffer(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "Successfully got all offers", categories, nil)
 	c.JSON(http.StatusOK, successRes)
 }
+
+// @Summary Add Category Offer
+// @Description Add a new Offer for a product by specifying a limit
+// @Tags Admin Offer Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param coupon body models.CategoryOfferReceiver  true "Add new category Offer"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/categoryoffer [POST]
+
+func AddCategoryoffer(c *gin.Context) {
+	var categoryoffer models.CategoryOfferReceiver
+	if err := c.ShouldBindJSON(&categoryoffer); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "request fields wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	err := validator.New().Struct(&categoryoffer)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "constraint not satisfied", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	err = usecase.AddCategoryOffer(categoryoffer)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "could not add offer", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusCreated, "Successfully added offer", nil, nil)
+	c.JSON(http.StatusCreated, success)
+}

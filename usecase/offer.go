@@ -20,3 +20,10 @@ func Getoffers() ([]domain.ProductOffer, error) {
 	}
 	return offers, nil
 }
+
+func AddCategoryOffer(model models.CategoryOfferReceiver) error {
+	if err := repository.AddCategoryOffer(model); err != nil {
+		return err
+	}
+	return nil
+}
