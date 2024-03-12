@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/db"
+	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 )
 
@@ -57,4 +58,13 @@ func AddProductOffer(productOffer models.ProductOfferReciever) error {
 		return err
 	}
 	return nil
+}
+
+func Getoffers() ([]domain.ProductOffer, error) {
+	var model []domain.ProductOffer
+	err := db.DB.Raw("SELECT * FROM product_offers").Scan(&model).Error
+	if err != nil {
+		return []domain.ProductOffer{}, err
+	}
+	return model, nil
 }

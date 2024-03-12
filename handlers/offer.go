@@ -44,3 +44,24 @@ func AddProductOffer(c *gin.Context) {
 	c.JSON(http.StatusCreated, success)
 
 }
+
+// @Summary Show  Product Offer
+// @Description Add a new Offer for a product by specifying a limit
+// @Tags Admin Offer Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /admin/productoffer [GET]
+
+func GetProductOffer(c *gin.Context) {
+	categories, err := usecase.Getoffers()
+	if err != nil {
+		errsRes := response.ClientResponse(http.StatusBadRequest, "fields provided are wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errsRes)
+		return
+	}
+	successRes := response.ClientResponse(http.StatusOK, "Successfully got all offers", categories, nil)
+	c.JSON(http.StatusOK, successRes)
+}
