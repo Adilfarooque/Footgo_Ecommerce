@@ -98,7 +98,7 @@ func ExpireCoupon(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, errorRes)
 		return
 	}
-	successRes := response.ClientResponse(http.StatusOK, "Coupon expired successfully", nil, err.Error())
+	successRes := response.ClientResponse(http.StatusOK, "Coupon expired successfully", nil, nil)
 	c.JSON(http.StatusOK, successRes)
 
 }
