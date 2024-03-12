@@ -127,3 +127,11 @@ func FindUserByEmail(user models.LoginDetail) (models.UserLoginResponse, error) 
 	}
 	return userDetails, nil
 }
+
+func GetAllAddress(userId int) ([]models.AddressInfoResponse, error) {
+	var AddressInfoResponse []models.AddressInfoResponse
+	if err := db.DB.Raw("SELECT * FROM addresses WHERE user_id = ?", userId).Scan(&AddressInfoResponse).Error; err != nil {
+		return []models.AddressInfoResponse{}, err
+	}
+	return AddressInfoResponse, nil
+}

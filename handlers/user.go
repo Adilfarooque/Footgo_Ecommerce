@@ -73,3 +73,25 @@ func Userlogin(c *gin.Context) {
 	success := response.ClientResponse(http.StatusCreated, "User successfully logged in which password", user, nil)
 	c.JSON(http.StatusCreated, success)
 }
+
+// @Summary		Get Addresses
+// @Description	user can get all their addresses
+// @Tags			User Profile
+// @Accept          json
+// @Produce         json
+// @Security		Bearer
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router		/user/address       [GET]
+
+func GetAllAddress(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	addressInfo, err := usecase.GetAllAddress(userID.(int))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "filed to retirve details", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "User Address", addressInfo, nil)
+	c.JSON(http.StatusOK, success)
+}

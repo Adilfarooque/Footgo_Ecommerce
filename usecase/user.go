@@ -143,3 +143,11 @@ func UserLogin(user models.LoginDetail) (*models.TokenUser, error) {
 		RefreshToken: refreshToken,
 	}, nil
 }
+
+func GetAllAddress(userId int) ([]models.AddressInfoResponse, error) {
+	addressinfo, err := repository.GetAllAddress(userId)
+	if err != nil {
+		return []models.AddressInfoResponse{}, err
+	}
+	return addressinfo, nil
+}

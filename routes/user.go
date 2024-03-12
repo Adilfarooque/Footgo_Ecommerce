@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/Adilfarooque/Footgo_Ecommerce/handlers"
+	"github.com/Adilfarooque/Footgo_Ecommerce/middleware"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -15,6 +16,14 @@ func UserRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		products.GET("", handlers.ShowAllProducts)
 		products.POST("/filter",handlers.FilterCategory)
 		products.GET("/image",handlers.ShowImages)
+	}
+
+	r.Use(middleware.UserAuthMiddleware())
+	{
+		address := r.Group("/address")
+		{
+			address.GET("",handlers.GetAllAddress)
+		}
 	}
 	return r
 }
