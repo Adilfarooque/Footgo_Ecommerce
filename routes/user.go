@@ -25,6 +25,7 @@ func UserRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			address.GET("",handlers.GetAllAddress)
 			address.POST("",handlers.AddAddress)
 			address.PUT("",handlers.UpdateAddress)
+			address.DELETE("",handlers.DeleteAddressByID)
 		}
 	}
 	return r

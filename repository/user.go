@@ -205,3 +205,20 @@ func AddressDetails(addressID int) (models.AddressInfoResponse, error) {
 	}
 	return addressDetails, nil
 }
+
+func AddressExistInUserProfile(addressID, userID int) (bool, error) {
+	var count int
+	err := db.DB.Raw("SELECT COUNT(*) FROM addresses WHERE user_id = $1 AND id = $2", userID, addressID).Scan(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func RemoveFromUserProfile(userID, addressID int) error {
+	err := db.DB.Exec("DELETE FROM addresses WHERE user_id = ? AND id = ?", userID, addressID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

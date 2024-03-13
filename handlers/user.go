@@ -164,3 +164,28 @@ func UpdateAddress(c *gin.Context) {
 	c.JSON(http.StatusOK, success)
 
 }
+
+// @Summary Delete User Address
+// @Description Delete From User Profile
+// @Tags User Profile
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param address_id query string true "address id"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /user/address    [DELETE]
+
+func DeleteAddressByID(c *gin.Context) {
+	user_id, _ := c.Get("user_id")
+	addressid := c.Query("address_id")
+	addressID, _ := strconv.Atoi(addressid)
+	err := usecase.DeleteAddress(addressID, user_id.(int))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "failed to delete user address", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Delete User Address", nil, nil)
+	c.JSON(http.StatusOK, success)
+}

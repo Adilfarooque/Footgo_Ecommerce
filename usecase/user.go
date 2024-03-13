@@ -186,3 +186,18 @@ func UpdateAddress(addressDetails models.AddressInfo, addressID, userID int) (mo
 	return repository.AddressDetails(addressID)
 
 }
+
+func DeleteAddress(addressID, userID int) error {
+	addressExist, err := repository.AddressExistInUserProfile(addressID, userID)
+	if err != nil {
+		return err
+	}
+	if !addressExist {
+		return errors.New("address does not exist in user profile")
+	}
+	err = repository.RemoveFromUserProfile(userID, addressID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
