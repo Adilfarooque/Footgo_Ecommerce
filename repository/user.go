@@ -135,3 +135,12 @@ func GetAllAddress(userId int) ([]models.AddressInfoResponse, error) {
 	}
 	return AddressInfoResponse, nil
 }
+
+func AddAddress(userID int, address models.AddressInfo) error {
+	err := db.DB.Exec("INSERT INTO addresses(user_id,name,house_name,street,city,state,pin)VALUES(?,?,?,?,?,?,?)", userID, address.Name, address.HouseName, address.Street, address.City, address.State, address.Pin).Error
+	if err != nil {
+		return errors.New("could not add address")
+	}
+	return nil
+}
+

@@ -95,3 +95,38 @@ func GetAllAddress(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "User Address", addressInfo, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary		Add Address
+// @Description	user can add their addresses
+// @Tags			User Profile
+// @Accept			json
+// @Produce		    json
+// @Param			address  body  models.AddressInfo  true	"address"
+// @Security		Bearer
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/user/address    [POST]
+
+func AddAddress(c *gin.Context) {
+	user_ID, _ := c.Get("user_id")
+	var address models.AddressInfo
+	if err := c.ShouldBindJSON(&address); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "field provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	err := validator.New().Struct(&address)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "constraints does not match", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	err = usecase.AddAddress(user_ID.(int), address)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "failed adding address", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Address added successfully", nil, nil)
+	c.JSON(http.StatusOK, success)
+}

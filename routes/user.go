@@ -23,6 +23,8 @@ func UserRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		address := r.Group("/address")
 		{
 			address.GET("",handlers.GetAllAddress)
+			address.POST("",handlers.AddAddress)
+			
 		}
 	}
 	return r

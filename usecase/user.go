@@ -151,3 +151,11 @@ func GetAllAddress(userId int) ([]models.AddressInfoResponse, error) {
 	}
 	return addressinfo, nil
 }
+
+func AddAddress(userID int, address models.AddressInfo) error {
+	err := repository.AddAddress(userID, address)
+	if err != nil {
+		return err
+	}
+	return nil
+}
