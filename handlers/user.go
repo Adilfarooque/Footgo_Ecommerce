@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/usecase"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
@@ -129,4 +130,37 @@ func AddAddress(c *gin.Context) {
 	}
 	success := response.ClientResponse(http.StatusOK, "Address added successfully", nil, nil)
 	c.JSON(http.StatusOK, success)
+}
+
+// @Summary Update User Address
+// @Description Update User address by sending in address id
+// @Tags User Profile
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param address_id query string true "address id"
+// @Param address body models.AddressInfo true "User Address Input"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /user/address    [PUT]
+
+func UpdateAddress(c *gin.Context) {
+	user_id, _ := c.Get("user_id")
+	addressid := c.Query("address_id")
+	addressID, _ := strconv.Atoi(addressid)
+	var address models.AddressInfo
+	if err := c.ShouldBindJSON(&address); err != nil {
+		errs := response.ClientResponse(http.StatusBadGateway, "field provided are wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	UpdateAddress, err := usecase.UpdateAddress(address, addressID, user_id.(int))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "failed to update user address", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Updated user Address", UpdateAddress, nil)
+	c.JSON(http.StatusOK, success)
+
 }

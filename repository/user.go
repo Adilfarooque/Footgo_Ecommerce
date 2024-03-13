@@ -144,3 +144,64 @@ func AddAddress(userID int, address models.AddressInfo) error {
 	return nil
 }
 
+func CheckAddressAvailabilityWithAddressID(addressID, userID int) bool {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM addresses WHERE id = ? AND user_id = ?", addressID, userID).Scan(&count).Error; err != nil {
+		return false
+	}
+	return count > 0
+}
+
+func UpdateName(name string, addressID int) error {
+	err := db.DB.Exec("UPDATE addresses SET name = ? WHERE id = ?", name, addressID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateHouseName(HouseName string, addressID int) error {
+	err := db.DB.Exec("UPDATE addresses SET  house_name = ? WHERE id = ?", HouseName, addressID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateStreet(Street string, addressID int) error {
+	err := db.DB.Exec("UPDATE addresses SET street = ? WHERE id = ?", Street, addressID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateCity(city string, addressID int) error {
+	if err := db.DB.Exec("UPDATE addresses SET city = ? WHERE id = ?", city, addressID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateState(state string, addressID int) error {
+	if err := db.DB.Exec("UPDATE addresses SET state = ? WHERE id = ?", state, addressID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdatePin(pin string, addressID int) error {
+	if err := db.DB.Exec("UPDATE addresses SET pin = ? WHERE id = ?", pin, addressID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func AddressDetails(addressID int) (models.AddressInfoResponse, error) {
+	var addressDetails models.AddressInfoResponse
+	err := db.DB.Raw("SELECT a.id, a.name, a.house_name, a.street, a.city, a.state, a.pin FROM addresses a WHERE a.id = ?", addressID).Row().Scan(&addressDetails.ID, &addressDetails.Name, &addressDetails.HouseName, &addressDetails.Street, &addressDetails.City, &addressDetails.State, &addressDetails.Pin)
+	if err != nil {
+		return models.AddressInfoResponse{}, err
+	}
+	return addressDetails, nil
+}

@@ -159,3 +159,30 @@ func AddAddress(userID int, address models.AddressInfo) error {
 	}
 	return nil
 }
+
+func UpdateAddress(addressDetails models.AddressInfo, addressID, userID int) (models.AddressInfoResponse, error) {
+	addressExist := repository.CheckAddressAvailabilityWithAddressID(addressID, userID)
+	if !addressExist {
+		return models.AddressInfoResponse{}, errors.New("address doesn't exist")
+	}
+	if addressDetails.Name != "" {
+		repository.UpdateName(addressDetails.Name, addressID)
+	}
+	if addressDetails.HouseName != "" {
+		repository.UpdateHouseName(addressDetails.HouseName, addressID)
+	}
+	if addressDetails.Street != "" {
+		repository.UpdateStreet(addressDetails.Street, addressID)
+	}
+	if addressDetails.City != "" {
+		repository.UpdateCity(addressDetails.City, addressID)
+	}
+	if addressDetails.State != "" {
+		repository.UpdateState(addressDetails.State, addressID)
+	}
+	if addressDetails.Pin != "" {
+		repository.UpdatePin(addressDetails.Pin, addressID)
+	}
+	return repository.AddressDetails(addressID)
+
+}
