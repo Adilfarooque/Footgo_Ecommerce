@@ -189,3 +189,83 @@ func DeleteAddressByID(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Delete User Address", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary User Details
+// @Description User Details from User Profile
+// @Tags User Profile
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /user/users   [GET]
+
+func UserDetails(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	UserDetails, err := usecase.UserDetails(userID.(int))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "failed to retrieve details", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "User Details", UserDetails, nil)
+	c.JSON(http.StatusOK, success)
+}
+
+// @Summary Update User Details
+// @Description Update User Details by sending in user id
+// @Tags User Profile
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param address body models.UsersProfileDetails true "User Details Input"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /user/users [PUT]
+
+func UpdateUserDetails(c *gin.Context) {
+	user_id, _ := c.Get("user_id")
+	var user models.UsersProfileDetails
+	if err := c.ShouldBindJSON(&user); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	UpdateUserDetails, err := usecase.UpdateUserDetails(user, user_id.(int))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "failed update user", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Updated User Details", UpdateUserDetails, err.Error())
+
+	c.JSON(http.StatusOK, success)
+}
+
+// @Summary Change User Password
+// @Description Change User Password
+// @Tags User Profile
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param body body models.ChangePassword true "User Password Change"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /user/users/changepassword     [PUT]
+
+func ChangePassword(c *gin.Context) {
+	user_id, _ := c.Get("user_id")
+	var changePassword models.ChangePassword
+	if err := c.ShouldBindJSON(&changePassword); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "fields provided are wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	if err := usecase.ChangePassword(user_id.(int), changePassword.Oldpassword, changePassword.Password, changePassword.Repassword); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Could not change the password", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Password changed successfully", nil, nil)
+	c.JSON(http.StatusOK, success)
+}

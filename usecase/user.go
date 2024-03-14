@@ -201,3 +201,46 @@ func DeleteAddress(addressID, userID int) error {
 	}
 	return nil
 }
+
+func UserDetails(userID int) (models.UsersProfileDetails, error) {
+	return repository.UserDetails(userID)
+}
+
+func UpdateUserDetails(userDetails models.UsersProfileDetails,userID int)(models.UsersProfileDetails,error){
+	userExist := repository.CheckUserAvailabilityWithID(userID)
+	if !userExist {
+		return models.UsersProfileDetails{},errors.New("user doesn't exist")
+	}
+	if userDetails.Email != ""{
+		 repository.UpdateUserEmail(userDetails.Email,userID)
+	}
+	if userDetails.Firstname != ""{
+		 repository.UpdateUserFirstname(userDetails.Firstname,userID)
+	}
+	if userDetails.Lastname != ""{
+		repository.UpdateUserLastname(userDetails.Lastname,userID)
+	}
+	if userDetails.Phone != ""{
+		repository.UpdateUserPhone(userDetails.Phone,userID)
+	}
+	return repository.UserDetails(userID)
+}
+
+func ChangePassword(id int, old string, password string, repassword string) error {
+	userPassword, err := repository.GetPassword(id)
+	if err != nil {
+		return errors.New("Internal error")
+	}
+	if err = helper.CompareHashAndPassword(userPassword, old); err != nil {
+		return errors.New("Passwod incorrect")
+	}
+	if password != repassword {
+		return errors.New("Passwod doesn't match")
+	}
+	newPassword, err := helper.PasswordHash(password)
+	if err != nil {
+		return errors.New("error in hashing password")
+	}
+	return repository.ChangePassword(id, string(newPassword))
+
+}

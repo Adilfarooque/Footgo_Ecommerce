@@ -222,3 +222,72 @@ func RemoveFromUserProfile(userID, addressID int) error {
 	}
 	return nil
 }
+
+func UserDetails(userID int) (models.UsersProfileDetails, error) {
+	var userDetails models.UsersProfileDetails
+	err := db.DB.Raw("SELECT u.firstname,u.lastname,u.email,u.phone FROM users u WHERE u.id = ?", userID).Row().Scan(&userDetails.Firstname, &userDetails.Lastname, &userDetails.Email, &userDetails.Phone)
+	if err != nil {
+		return models.UsersProfileDetails{}, err
+	}
+	err = db.DB.Raw("SELECT referral_code FROM referrals WHERE user_id = ?", userID).Scan(&userDetails.ReferralCode).Error
+	if err != nil {
+		return models.UsersProfileDetails{}, err
+	}
+	return userDetails, nil
+}
+
+func CheckUserAvailabilityWithID(userID int) bool {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM users WHERE id = ?", userID).Scan(&count).Error; err != nil {
+		return false
+	}
+	return count > 0
+}
+
+func UpdateUserEmail(email string, userID int) error {
+	err := db.DB.Exec("UPDATE users SET email = ? WHERE id = ?", email, userID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateUserFirstname(firstname string, userID int) error {
+	err := db.DB.Exec("UPDATE users SET firstname = ? WHERE id = ?", firstname, userID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateUserLastname(lastname string, userID int) error {
+	err := db.DB.Exec("UPDATE users SET lastname = ? WHERE id = ?", lastname, userID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateUserPhone(phone string, userID int) error {
+	if err := db.DB.Exec("UPDATE users SET phone = ? WHERE id = ?", phone, userID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetPassword(id int) (string, error) {
+	var userPassword string
+	err := db.DB.Raw("SELECT password FROM users WHERE id = ?", id).Scan(&userPassword).Error
+	if err != nil {
+		return "", err
+	}
+	return userPassword, nil
+}
+
+func ChangePassword(id int, password string) error {
+	if err := db.DB.Exec("UPDATE users SET password = $1 WHERE id = $2", password, id).Error; err != nil {
+		return err
+	}
+	return nil
+}
+

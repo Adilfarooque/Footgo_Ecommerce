@@ -14,19 +14,29 @@ func UserRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 	products := r.Group("/products")
 	{
 		products.GET("", handlers.ShowAllProducts)
-		products.POST("/filter",handlers.FilterCategory)
-		products.GET("/image",handlers.ShowImages)
+		products.POST("/filter", handlers.FilterCategory)
+		products.GET("/image", handlers.ShowImages)
 	}
 
 	r.Use(middleware.UserAuthMiddleware())
 	{
+
 		address := r.Group("/address")
 		{
-			address.GET("",handlers.GetAllAddress)
-			address.POST("",handlers.AddAddress)
-			address.PUT("",handlers.UpdateAddress)
-			address.DELETE("",handlers.DeleteAddressByID)
+			address.GET("", handlers.GetAllAddress)
+			address.POST("", handlers.AddAddress)
+			address.PUT("", handlers.UpdateAddress)
+			address.DELETE("", handlers.DeleteAddressByID)
 		}
+
+		users := r.Group("/users")
+		{
+			users.GET("", handlers.UserDetails)
+			users.PUT("",handlers.UpdateUserDetails)
+			users.PUT("changepassword",handlers.ChangePassword)
+		}
+
+
 	}
 	return r
 }
