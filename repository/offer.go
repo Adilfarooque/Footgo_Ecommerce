@@ -11,7 +11,7 @@ import (
 
 func FindDiscountPercentageForProduct(id int) (int, error) {
 	var percentage int
-	err := db.DB.Raw("SELECT discount_percentage FROM product_offers WHERE product_id $1 ", id).Scan(&percentage).Error
+	err := db.DB.Raw("SELECT discount_percentage FROM product_offers WHERE product_id = ?", id).Scan(&percentage).Error
 	if err != nil {
 		return 0, err
 	}

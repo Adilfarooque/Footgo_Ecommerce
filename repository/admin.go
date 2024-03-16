@@ -213,12 +213,12 @@ func ShowAllProductsFromAdmin(page, count int) ([]models.ProductBreif, error) {
 		page = 1
 	}
 	offset := (page - 1) * count
-	var ProductBreif []models.ProductBreif
-	err := db.DB.Raw("SELECT * FROM products LIMIT ? OFFSET ?", count, offset).Scan(&ProductBreif).Error
+	var ProductBrief []models.ProductBreif
+	err := db.DB.Raw("SELECT * FROM products LIMIT ? OFFSET ?", count, offset).Scan(&ProductBrief).Error
 	if err != nil {
 		return nil, err
 	}
-	return ProductBreif, nil
+	return ProductBrief, nil
 }
 
 func CheckifPaymentMethodAlreadyExists(payment string) (bool, error) {

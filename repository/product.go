@@ -191,3 +191,12 @@ func UpdateProductImage(productID int, url string) error {
 	}
 	return nil
 }
+
+func DoesProductExist(productID int) (bool, error) {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM products WHERE id = ?", productID).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+

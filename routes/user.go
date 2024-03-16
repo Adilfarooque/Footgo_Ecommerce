@@ -32,10 +32,19 @@ func UserRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		users := r.Group("/users")
 		{
 			users.GET("", handlers.UserDetails)
-			users.PUT("",handlers.UpdateUserDetails)
-			users.PUT("changepassword",handlers.ChangePassword)
+			users.PUT("", handlers.UpdateUserDetails)
+			users.PUT("changepassword", handlers.ChangePassword)
 		}
 
+		wishlist := r.Group("/wishlist")
+		{
+			wishlist.POST("", handlers.AddToWishlist)
+		}
+
+		cart := r.Group("/cart")
+		{
+				cart.POST("",handlers.AddToCart)
+		}
 
 	}
 	return r

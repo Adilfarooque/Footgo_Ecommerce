@@ -269,3 +269,4 @@ func ChangePassword(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Password changed successfully", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
+
