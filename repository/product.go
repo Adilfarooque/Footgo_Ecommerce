@@ -63,6 +63,13 @@ func GetQuantityFromProductID(id int) (int, error) {
 	}
 	return quantity, nil
 }
+func GetPriceOfProductFromID(productId int) (float64, error) {
+	var productPrice float64
+	if err := db.DB.Raw("SELECT price FROM products WHERE id = ?", productId).Scan(&productPrice).Error; err != nil {
+		return 0.0, err
+	}
+	return productPrice, nil
+}
 
 func ProductAlreadyExist(Name string) bool {
 	var count int
@@ -200,3 +207,10 @@ func DoesProductExist(productID int) (bool, error) {
 	return count > 0, nil
 }
 
+func FindCategoryID(categoryID int) (int, error) {
+	var catid int
+	if err := db.DB.Raw("SELECT category_id FROM products WHERE id = ?", categoryID).Scan(&catid).Error; err != nil {
+		return 0, err
+	}
+	return catid, nil
+}
