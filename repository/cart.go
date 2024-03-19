@@ -171,3 +171,18 @@ func CartAfterRemovalOfProduct(user_id int) ([]models.Cart, error) {
 	}
 	return cart, nil
 }
+
+func CartExist(userID int) (bool, error) {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM carts WHERE user_id = ? ", userID).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func EmptyCart(userID int) error {
+	if err := db.DB.Exec("DELETE FROM carts WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+	return nil
+}

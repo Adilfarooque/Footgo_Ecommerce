@@ -91,3 +91,25 @@ func DisplayCart(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Cart items display successfully", cart, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary		Empty Cart
+// @Description	Empty products to carts  for the purchase
+// @Tags			User Cart Management
+// @Accept			json
+// @Produce		    json
+// @Security		Bearer
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/user/cart/empty   [DELETE]
+
+func EmptyCart(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	cart, err := usecase.EmptyCart(userID.(int))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "cannot empty the cart", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Cart emptied Successfully", cart, nil)
+	c.JSON(http.StatusOK, success)
+}
