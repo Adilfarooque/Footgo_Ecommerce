@@ -70,3 +70,24 @@ func RemoveFromCart(c *gin.Context) {
 	c.JSON(http.StatusOK, success)
 }
 
+// @Summary		Display Cart
+// @Description	Display products to carts
+// @Tags			User Cart Management
+// @Accept			json
+// @Produce		    json
+// @Security		Bearer
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/user/cart  [GET]
+
+func DisplayCart(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	cart, err := usecase.DisplayCart(userID.(int))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "cannot display cart", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Cart items display successfully", cart, nil)
+	c.JSON(http.StatusOK, success)
+}

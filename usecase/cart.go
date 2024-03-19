@@ -161,3 +161,19 @@ func RemoveFromCart(product_id, user_id int) (models.CartResponse, error) {
 		Cart:       updateCart,
 	}, nil
 }
+
+func DisplayCart(user_id int) (models.CartResponse, error) {
+	cart, err := repository.DisplayCart(user_id)
+	if err != nil {
+		return models.CartResponse{}, err
+	}
+	cartTotal, err := repository.GetTotalPrice(user_id)
+	if err != nil {
+		return models.CartResponse{}, err
+	}
+	return models.CartResponse{
+		UserName:   cartTotal.UserName,
+		TotalPrice: cartTotal.TotalPrice,
+		Cart:       cart,
+	}, nil
+}
