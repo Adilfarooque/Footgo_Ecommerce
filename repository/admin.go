@@ -209,17 +209,18 @@ func UpdateBlockedUserByID(user domain.User) error {
 }
 
 func ShowAllProductsFromAdmin(page, count int) ([]models.ProductBreif, error) {
-	if page == 0 {
-		page = 1
-	}
-	offset := (page - 1) * count
-	var ProductBrief []models.ProductBreif
-	err := db.DB.Raw("SELECT * FROM products LIMIT ? OFFSET ?", count, offset).Scan(&ProductBrief).Error
-	if err != nil {
-		return nil, err
-	}
-	return ProductBrief, nil
+    if page == 0 {
+        page = 1
+    }
+    offset := (page - 1) * count
+    var productBriefs []models.ProductBreif
+    err := db.DB.Raw("SELECT * FROM products LIMIT ? OFFSET ?", count, offset).Scan(&productBriefs).Error
+    if err != nil {
+        return nil, err
+    }
+    return productBriefs, nil
 }
+
 
 func CheckifPaymentMethodAlreadyExists(payment string) (bool, error) {
 	var count int64

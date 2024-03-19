@@ -91,3 +91,73 @@ func AddToCart(product_id int, user_id int) (models.CartResponse, error) {
 		Cart:       cartDetails,
 	}, nil
 }
+
+func RemoveFromCart(product_id, user_id int) (models.CartResponse, error) {
+	// Check if the product exists in the user's cart
+	ok, err := repository.ProductExist(user_id, product_id)
+	if err != nil {
+		// If there's an error, return an empty CartResponse struct and the error
+		return models.CartResponse{}, err
+	}
+	if !ok {
+		// If the product does not exist, return an error
+		return models.CartResponse{}, errors.New("product doesn't exist in the cart")
+	}
+
+	// Struct to store the quantity and total price of the product
+	var cartDetails struct {
+		Quantity   int
+		TotalPrice float64
+	}
+
+	// Get the quantity and total price of the product from the cart
+	cartDetails, err = repository.GetQuantityAndProductFromID(user_id, product_id, cartDetails)
+	if err != nil {
+		// If there's an error, return an empty CartResponse struct and the error
+		return models.CartResponse{}, err
+	}
+
+	// Remove the product from the cart
+	if err := repository.RemoveProductFromCart(user_id, product_id); err != nil {
+		// If there's an error, return an empty CartResponse struct and the error
+		return models.CartResponse{}, err
+	}
+
+	// If the product quantity is not zero, update the cart details
+	if cartDetails.Quantity != 0 {
+		product_price, err := repository.GetPriceOfProductFromID(product_id)
+		if err != nil {
+			// If there's an error, return an empty CartResponse struct and the error
+			return models.CartResponse{}, err
+		}
+		// Calculate the new total price
+		cartDetails.TotalPrice = float64(cartDetails.Quantity) * product_price
+		// Update the cart with the new total price
+		err = repository.UpdateCartDetails(cartDetails, user_id, product_id)
+		if err != nil {
+			// If there's an error, return an empty CartResponse struct and the error
+			return models.CartResponse{}, err
+		}
+	}
+
+	// Get the updated cart details after the product has been removed
+	updateCart, err := repository.CartAfterRemovalOfProduct(user_id)
+	if err != nil {
+		// If there's an error, return an empty CartResponse struct and the error
+		return models.CartResponse{}, err
+	}
+
+	// Calculate the new total price for the cart
+	cartTotal, err := repository.GetTotalPrice(user_id)
+	if err != nil {
+		// If there's an error, return an empty CartResponse struct and the error
+		return models.CartResponse{}, err
+	}
+
+	// Return the updated CartResponse with the user's name, new total price, and updated cart details
+	return models.CartResponse{
+		UserName:   cartTotal.UserName,
+		TotalPrice: cartTotal.TotalPrice,
+		Cart:       updateCart,
+	}, nil
+}

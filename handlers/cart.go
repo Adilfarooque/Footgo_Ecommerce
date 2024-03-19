@@ -39,3 +39,34 @@ func AddToCart(c *gin.Context) {
 	c.JSON(http.StatusOK, success)
 
 }
+
+// @Summary		Remove From Cart
+// @Description	Remove products to carts  for the purchase
+// @Tags			User Cart Management
+// @Accept			json
+// @Produce		    json
+// @Param			id	query		string	true	"product-id"
+// @Security		Bearer
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/user/cart    [DELETE]
+
+func RemoveFromCart(c *gin.Context) {
+	id := c.Query("id")
+	product_id, err := strconv.Atoi(id)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "product not in right format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	user_ID, _ := c.Get("user_id")
+	updateCart, err := usecase.RemoveFromCart(product_id, user_ID.(int))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadGateway, "can't remove product from cart", nil, err.Error())
+		c.JSON(http.StatusBadGateway, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "product removed successfully", updateCart, nil)
+	c.JSON(http.StatusOK, success)
+}
+

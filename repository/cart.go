@@ -111,3 +111,63 @@ func ProductStockMinus(productID, stock int) error {
 	}
 	return nil
 }
+
+func ProductExist(userID, producID int) (bool, error) {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM carts WHERE carts.user_id = ? AND product_id = ?", userID, producID).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+// GetQuantityAndProductFromID retrieves the quantity and total price of a product in the user's cart.
+func GetQuantityAndProductFromID(userId, productId int, cartDetails struct {
+	Quantity   int
+	TotalPrice float64
+}) (struct {
+	Quantity   int
+	TotalPrice float64
+}, error) {
+	// Execute the SQL query to get the quantity and total price from the carts table
+	if err := db.DB.Raw("SELECT quantity,total_price FROM carts WHERE user_id = ? AND product_id = ?", userId, productId).Scan(&cartDetails).Error; err != nil {
+		// If there's an error, return an empty struct and the error
+		return struct {
+			Quantity   int
+			TotalPrice float64
+		}{}, err
+	}
+	// If successful, return the cartDetails struct with the data and nil for no error
+	return cartDetails, nil
+}
+
+// RemoveProductFromCart deletes a product from the user's cart.
+func RemoveProductFromCart(userID, productID int) error {
+	// Execute the SQL command to delete the product from the cart
+	if err := db.DB.Exec("DELETE FROM carts WHERE user_id = ? AND product_id = ?", userID, productID).Error; err != nil {
+		// If there's an error, return the error
+		return err
+	}
+	// If successful, return nil indicating no error occurred
+	return nil
+}
+
+func UpdateCartDetails(cartDetails struct {
+	Quantity   int
+	TotalPrice float64
+}, userId int, productId int) error {
+	// Execute the SQL command to update the cart details
+	if err := db.DB.Exec("UPDATE carts SET quantity = ?, total_price = ? WHERE user_id = ? AND product_id = ?", cartDetails.Quantity, cartDetails.TotalPrice, userId, productId).Error; err != nil {
+		// If there's an error, return the error
+		return err
+	}
+	// If successful, return nil indicating no error occurred
+	return nil
+}
+
+func CartAfterRemovalOfProduct(user_id int) ([]models.Cart, error) {
+	var cart []models.Cart
+	if err := db.DB.Raw("SELECT carts.product_id,products.name as product_name,carts.quantity,carts.total_price FROM carts INNER JOIN products on carts.product_id = products.id WHERE carts.user_id = ?", user_id).Scan(&cart).Error; err != nil {
+		return []models.Cart{}, err
+	}
+	return cart, nil
+}
