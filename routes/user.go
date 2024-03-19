@@ -43,10 +43,11 @@ func UserRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 
 		cart := r.Group("/cart")
 		{
-				cart.POST("",handlers.AddToCart)
-				cart.DELETE("",handlers.RemoveFromCart)
-				cart.GET("",handlers.DisplayCart)
-				cart.DELETE("/empty",handlers.EmptyCart)
+			cart.POST("", handlers.AddToCart)
+			cart.DELETE("", handlers.RemoveFromCart)
+			cart.GET("", handlers.DisplayCart)
+			cart.DELETE("/empty", handlers.EmptyCart)
+			cart.PUT("/updatequantityadd", handlers.UpdateQuantityAdd)
 		}
 
 	}

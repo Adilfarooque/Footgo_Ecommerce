@@ -113,3 +113,31 @@ func EmptyCart(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Cart emptied Successfully", cart, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary		Add quantity in cart by one
+// @Description	user can add 1 quantity of product to their cart
+// @Tags			User Cart Management
+// @Accept			json
+// @Produce		    json
+// @Param			product_id	query	string	true	"product_id"
+// @Security		Bearer
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/user/cart/updatequantityadd   [PUT]
+
+func UpdateQuantityAdd(c *gin.Context) {
+	id, _ := c.Get("user_id")
+	productID, err := strconv.Atoi(c.Query("product_id"))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "check product id parameter properly", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	if err := usecase.UpdateQuantityAdd(id.(int), productID); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "could not add quantity", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully added quantity", nil, nil)
+	c.JSON(http.StatusOK, success)
+}

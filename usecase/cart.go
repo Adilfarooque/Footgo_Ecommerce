@@ -200,3 +200,67 @@ func EmptyCart(userID int) (models.CartResponse, error) {
 	}
 	return cartResponse, nil
 }
+
+func UpdateQuantityAdd(id, productID int) error {
+	productExist, err := repository.ProductExistCart(id, productID)
+	if !productExist {
+		return errors.New("product doesn't exist in cart")
+	}
+	if err != nil {
+		return err
+	}
+	stock, err := repository.ProductStock(productID)
+	if err != nil {
+		return err
+	}
+	if stock <= 0 {
+		return errors.New("not available out of stock")
+	}
+	if err = repository.UpdateQuantityAdd(id, productID); err != nil {
+		return err
+	}
+
+	stockfromcart, err := repository.StockFromCart(productID)
+	if err != nil {
+		return err
+	}
+	if stock <= stockfromcart {
+		return errors.New("its maximum, no more updation")
+	}
+
+	productPrice, err := repository.GetPriceOfProductFromID(productID)
+	if err != nil {
+		return err
+	}
+	discount_percentage, err := repository.FindDiscountPercentageForProduct(productID)
+	if err != nil {
+		return errors.New("there was some error in finding the discounted prices")
+	}
+	var discount float64
+
+	if discount_percentage > 0 {
+		discount = (productPrice * float64(discount_percentage)) / 100
+	}
+
+	Price := productPrice - discount
+	categoryID, err := repository.FindCategoryID(productID)
+	if err != nil {
+		return err
+	}
+	discount_percentageCategory, err := repository.FindDiscountPercentageForCategory(categoryID)
+	if err != nil {
+		return errors.New("there was some errors in finding the discounted prices")
+	}
+	var discountcategory float64
+
+	if discount_percentageCategory > 0 {
+		discountcategory = (productPrice - float64(discount_percentageCategory)) / 100
+	}
+	FinalPrice := Price - discountcategory
+	FinalPrice = FinalPrice - float64(stockfromcart)
+	if err := repository.UpdateTotalPrice(id, productID, FinalPrice); err != nil {
+		return err
+	}
+	return nil
+
+}

@@ -291,3 +291,40 @@ func ChangePassword(id int, password string) error {
 	return nil
 }
 
+func ProductExistCart(userID, productID int) (bool, error) {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM carts WHERE user_id = ? AND product_id = ?", userID, productID).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func ProductStock(productID int) (int, error) {
+	var stk int
+	if err := db.DB.Raw("SELECT * FROM products WHERE id = ?", productID).Scan(&stk).Error; err != nil {
+		return 0, err
+	}
+	return stk, nil
+}
+
+func UpdateQuantityAdd(id, productId int) error {
+	if err := db.DB.Exec("UPDATE carts SET quantity = quantity + 1 WHERE user_id = $1 AND product_id = $2", id, productId).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func StockFromCart(productID int) (int, error) {
+	var prdstk int
+	if err := db.DB.Raw("SELECT quantity  FROM carts WHERE product_id = ?", productID).Scan(&prdstk).Error; err != nil {
+		return 0, err
+	}
+	return prdstk, nil
+}
+
+func UpdateTotalPrice(Id, productID int, FinalPrice float64) error {
+	if err := db.DB.Raw("UPDATE carts SET total_price = $1 WHERE user_id = $2 AND product_id = $3", FinalPrice, Id, productID).Error; err != nil {
+		return err
+	}
+	return nil
+}
