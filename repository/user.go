@@ -301,11 +301,12 @@ func ProductExistCart(userID, productID int) (bool, error) {
 
 func ProductStock(productID int) (int, error) {
 	var stk int
-	if err := db.DB.Raw("SELECT * FROM products WHERE id = ?", productID).Scan(&stk).Error; err != nil {
+	if err := db.DB.Raw("SELECT stock FROM products WHERE id = ?", productID).Scan(&stk).Error; err != nil {
 		return 0, err
 	}
 	return stk, nil
 }
+
 
 func UpdateQuantityAdd(id, productId int) error {
 	if err := db.DB.Exec("UPDATE carts SET quantity = quantity + 1 WHERE user_id = $1 AND product_id = $2", id, productId).Error; err != nil {

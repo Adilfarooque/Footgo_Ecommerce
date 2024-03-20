@@ -28,11 +28,12 @@ func PasswordHash(password string) (string, error) {
 
 func GenerateTokenUsers(userID int, userEmail string, expirationTime time.Time) (string, error) {
 	cfg, _ := config.LoadConfig()
+	expirationTime48 := expirationTime.Add(48 * time.Hour)
 	claims := &AuthUserClaims{
 		Id:    userID,
 		Email: userEmail,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
+			ExpiresAt: expirationTime48.Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
 	}
