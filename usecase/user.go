@@ -206,22 +206,22 @@ func UserDetails(userID int) (models.UsersProfileDetails, error) {
 	return repository.UserDetails(userID)
 }
 
-func UpdateUserDetails(userDetails models.UsersProfileDetails,userID int)(models.UsersProfileDetails,error){
+func UpdateUserDetails(userDetails models.UsersProfileDetails, userID int) (models.UsersProfileDetails, error) {
 	userExist := repository.CheckUserAvailabilityWithID(userID)
 	if !userExist {
-		return models.UsersProfileDetails{},errors.New("user doesn't exist")
+		return models.UsersProfileDetails{}, errors.New("user doesn't exist")
 	}
-	if userDetails.Email != ""{
-		 repository.UpdateUserEmail(userDetails.Email,userID)
+	if userDetails.Email != "" {
+		repository.UpdateUserEmail(userDetails.Email, userID)
 	}
-	if userDetails.Firstname != ""{
-		 repository.UpdateUserFirstname(userDetails.Firstname,userID)
+	if userDetails.Firstname != "" {
+		repository.UpdateUserFirstname(userDetails.Firstname, userID)
 	}
-	if userDetails.Lastname != ""{
-		repository.UpdateUserLastname(userDetails.Lastname,userID)
+	if userDetails.Lastname != "" {
+		repository.UpdateUserLastname(userDetails.Lastname, userID)
 	}
-	if userDetails.Phone != ""{
-		repository.UpdateUserPhone(userDetails.Phone,userID)
+	if userDetails.Phone != "" {
+		repository.UpdateUserPhone(userDetails.Phone, userID)
 	}
 	return repository.UserDetails(userID)
 }
@@ -229,18 +229,144 @@ func UpdateUserDetails(userDetails models.UsersProfileDetails,userID int)(models
 func ChangePassword(id int, old string, password string, repassword string) error {
 	userPassword, err := repository.GetPassword(id)
 	if err != nil {
-		return errors.New("Internal error")
+		return errors.New("internal error")
 	}
 	if err = helper.CompareHashAndPassword(userPassword, old); err != nil {
-		return errors.New("Passwod incorrect")
+		return errors.New("passwod incorrect")
 	}
 	if password != repassword {
-		return errors.New("Passwod doesn't match")
+		return errors.New("passwod doesn't match")
 	}
 	newPassword, err := helper.PasswordHash(password)
 	if err != nil {
 		return errors.New("error in hashing password")
 	}
 	return repository.ChangePassword(id, string(newPassword))
+
+}
+
+func UpdateQuantityAdd(id, productID int) error {
+	productExist, err := repository.ProductExistCart(id, productID)
+	if !productExist {
+		return errors.New("product doesn't exist in cart")
+	}
+	if err != nil {
+		return err
+	}
+	stock, err := repository.ProductStock(productID)
+	if err != nil {
+		return err
+	}
+	if stock <= 0 {
+		return errors.New("not available out of stock")
+	}
+	if err = repository.UpdateQuantityAdd(id, productID); err != nil {
+		return err
+	}
+
+	stockfromcart, err := repository.StockFromCart(productID)
+	if err != nil {
+		return err
+	}
+	if stock <= stockfromcart {
+		return errors.New("its maximum, no more updation")
+	}
+
+	productPrice, err := repository.GetPriceOfProductFromID(productID)
+	if err != nil {
+		return err
+	}
+	discount_percentage, err := repository.FindDiscountPercentageForProduct(productID)
+	if err != nil {
+		return errors.New("there was some error in finding the discounted prices")
+	}
+	var discount float64
+
+	if discount_percentage > 0 {
+		discount = (productPrice * float64(discount_percentage)) / 100
+	}
+
+	Price := productPrice - discount
+	categoryID, err := repository.FindCategoryID(productID)
+	if err != nil {
+		return err
+	}
+	discount_percentageCategory, err := repository.FindDiscountPercentageForCategory(categoryID)
+	if err != nil {
+		return errors.New("there was some errors in finding the discounted prices")
+	}
+	var discountcategory float64
+
+	if discount_percentageCategory > 0 {
+		discountcategory = (productPrice - float64(discount_percentageCategory)) / 100
+	}
+	FinalPrice := Price - discountcategory
+	FinalPrice = FinalPrice - float64(stockfromcart)
+	if err := repository.UpdateTotalPrice(id, productID, FinalPrice); err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func UpdateQuantityLess(id, productID int) error {
+	productExist, err := repository.ProductExistCart(id, productID)
+	if !productExist {
+		return errors.New("product doesn't exist cart")
+	}
+	if err != nil {
+		return err
+	}
+	stock, err := repository.ExistStock(id, productID)
+	if err != nil {
+		return err
+	}
+	if stock <= 1 {
+		return errors.New("it's minimum")
+	}
+	if err := repository.UpdateQuantityLess(id, productID); err != nil {
+		return err
+	}
+	stockfromcart, err := repository.StockFromCart(productID)
+	if err != nil {
+		return err
+	}
+	ProductPrice, err := repository.GetPriceOfProductFromID(productID)
+	if err != nil {
+		return err
+	}
+	discount_percentage, err := repository.FindDiscountPercentageForProduct(productID)
+	if err != nil {
+		return errors.New("there was some error in finding the discounted prices")
+	}
+	var discount float64
+
+	if discount_percentage > 0 {
+		discount = (ProductPrice * float64(discount_percentage)) / 100
+	}
+
+	Price := ProductPrice - discount
+	categoryID, err := repository.FindCategoryID(productID)
+	if err != nil {
+		return err
+	}
+
+	discount_percentageCategory, err := repository.FindDiscountPercentageForCategory(categoryID)
+	if err != nil {
+		return errors.New("there was some eror in finding the discounted prices")
+	}
+
+	var discountcategory float64
+
+	if discount_percentage > 0 {
+		discountcategory = (ProductPrice * float64(discount_percentageCategory)) / 100
+	}
+
+	FinalPrice := Price - discountcategory
+	FinalPrice = FinalPrice * float64(stockfromcart)
+	if err := repository.UpdateTotalPrice(id, productID, FinalPrice); err != nil {
+		return err
+	}
+	return nil
 
 }

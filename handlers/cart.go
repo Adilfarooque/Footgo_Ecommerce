@@ -154,19 +154,19 @@ func UpdateQuantityAdd(c *gin.Context) {
 // @Router			/user/cart/updatequantityless     [PUT]
 
 //Decreases the quantity of a product in a user’s cart
-// func UpdateQuantityLess(c *gin.Context){
-// 	id , _ := c.Get("user_id")
-// 	productID,err := strconv.Atoi(c.Query("product_id"))
-// 	if err != nil{
-// 		errs := response.ClientResponse(http.StatusBadRequest,"check parameter properly",nil,err.Error())
-// 		c.JSON(http.StatusBadRequest,errs)
-// 		return
-// 	}
-// 	if err := usecase.UpdateQuantityLess(id.(int),productID); err != nil{
-// 		errs := response.ClientResponse(http.StatusBadRequest,"could not less the quantity",nil,err.Error())
-// 		c.JSON(http.StatusBadRequest,errs)
-// 		return
-// 	}
-// 	success := response.ClientResponse(http.StatusOK,"Successfully less quantity",nil,nil)
-// 	c.JSON(http.StatusOK,success)
-// }
+func UpdateQuantityLess(c *gin.Context){
+	id , _ := c.Get("user_id")
+	productID,err := strconv.Atoi(c.Query("product_id"))
+	if err != nil{
+		errs := response.ClientResponse(http.StatusBadRequest,"check parameter properly",nil,err.Error())
+		c.JSON(http.StatusBadRequest,errs)
+		return
+	}
+	if err := usecase.UpdateQuantityLess(id.(int),productID); err != nil{
+		errs := response.ClientResponse(http.StatusBadRequest,"could not less the quantity",nil,err.Error())
+		c.JSON(http.StatusBadRequest,errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK,"Successfully less quantity",nil,nil)
+	c.JSON(http.StatusOK,success)
+}

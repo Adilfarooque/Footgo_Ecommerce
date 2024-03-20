@@ -307,7 +307,6 @@ func ProductStock(productID int) (int, error) {
 	return stk, nil
 }
 
-
 func UpdateQuantityAdd(id, productId int) error {
 	if err := db.DB.Exec("UPDATE carts SET quantity = quantity + 1 WHERE user_id = $1 AND product_id = $2", id, productId).Error; err != nil {
 		return err
@@ -323,8 +322,23 @@ func StockFromCart(productID int) (int, error) {
 	return prdstk, nil
 }
 
-func UpdateTotalPrice(Id, productID int, FinalPrice float64) error {
-	if err := db.DB.Raw("UPDATE carts SET total_price = $1 WHERE user_id = $2 AND product_id = $3", FinalPrice, Id, productID).Error; err != nil {
+func UpdateTotalPrice(ID, productID int, FinalPrice float64) error {
+	if err := db.DB.Exec(`UPDATE carts SET total_price = $1 WHERE user_id =$2 AND product_id = $3`, FinalPrice, ID, productID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func ExistStock(id, productID int) (int, error) {
+	var a int
+	if err := db.DB.Raw("SELECT quantity FROM carts WHERE user_id = ? AND product_id = ?", id, productID).Scan(&a).Error; err != nil {
+		return 0, err
+	}
+	return a, nil
+}
+
+func UpdateQuantityLess(id, prdID int) error {
+	if err := db.DB.Exec("UPDATE carts SET quantity = quantity - 1 WHERE user_id = $1 AND product_id = $2", id, prdID).Error; err != nil {
 		return err
 	}
 	return nil
