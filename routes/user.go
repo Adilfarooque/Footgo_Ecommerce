@@ -51,6 +51,10 @@ func UserRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			cart.PUT("/updatequantityless", handlers.UpdateQuantityLess)
 		}
 
+		 order := r.Group("/order")
+		 {
+			order.GET("",handlers.GetOrderDetails)
+		 }
 	}
 	return r
 }

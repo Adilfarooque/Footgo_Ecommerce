@@ -128,3 +128,43 @@ func UpdateHistory(userID, orderID int, amount float64, reason string) error {
 	}
 	return nil
 }
+
+// Retrieves detailed order information, including product details for each order
+func GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails, error) {
+	// It's good practice to check for a non-positive count as well
+	if page <= 0 {
+		page = 1
+	}
+	if count <= 0 {
+		count = 10 // Default page size
+	}
+
+	offset := (page - 1) * count
+	var orderDetails []models.OrderDetails
+	// Use parameterized queries to prevent SQL injection
+	err := db.DB.Raw("SELECT id as order_id, final_price, shipment_status, payment_status FROM orders WHERE user_id = ? LIMIT ? OFFSET ?", userId, count, offset).Scan(&orderDetails).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var fullOrderDetails []models.FullOrderDetails
+	for _, od := range orderDetails {
+		var orderProductDetails []models.OrederProductDetails
+		err := db.DB.Raw(`SELECT
+            order_items.product_id,
+            products.name AS product_name,
+            order_items.quantity,
+            order_items.total_price
+        FROM
+            order_items
+        INNER JOIN
+            products ON order_items.product_id = products.id
+        WHERE
+            order_items.order_id = ?`, od.OrderId).Scan(&orderProductDetails).Error
+		if err != nil {
+			return nil, err
+		}
+		fullOrderDetails = append(fullOrderDetails, models.FullOrderDetails{OrderDetails: od, OrederProductDetails: orderProductDetails})
+	}
+	return fullOrderDetails, nil
+}

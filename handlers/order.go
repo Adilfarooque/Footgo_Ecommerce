@@ -100,3 +100,43 @@ func CancelOrderFromAdmin(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Order Cancel Successfully", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary Get Order Details to user side
+// @Description Get all order details done by user to user side
+// @Tags User Order Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param page query string false "Page"
+// @Param count query string false "Count"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /user/order   [GET]
+
+// Retrieves order details
+func GetOrderDetails(c *gin.Context) {
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "page number is not correct format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	pageSize, err := strconv.Atoi(c.DefaultQuery("count", "10"))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "page count not in right format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	id, _ := c.Get("user_id")
+	UserID := id.(int)
+	OrderDetails, err := usecase.GetOrderDetails(UserID, page, pageSize)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Could not do the order", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Full Order Details", OrderDetails, nil)
+	c.JSON(http.StatusOK, success)
+}
+
