@@ -168,3 +168,56 @@ func GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails
 	}
 	return fullOrderDetails, nil
 }
+
+func UserOrderRelationship(orderID, userID int) (int, error) {
+	var testUserID int
+	if err := db.DB.Raw("SELECT user_id FROM orders WHERE id = ?", orderID).Scan(&testUserID).Error; err != nil {
+		return -1, err
+	}
+	return testUserID, nil
+}
+
+func GetProductDetailsFromOrders(orderID int) ([]models.OrderProducts, error) {
+	var orderProductDetails []models.OrderProducts
+	if err := db.DB.Raw("SELECT product_id,quantity AS stock FROM order_items WHERE order_id = ?", orderID).Scan(&orderProductDetails).Error; err != nil {
+		return []models.OrderProducts{}, err
+	}
+	return orderProductDetails, nil
+}
+
+func UpdateQuantityOfProduct(orderProducts []models.OrderProducts) error {
+	for _, ord := range orderProducts {
+		var quantity int
+		if err := db.DB.Raw("SELECT stock FROM products WHERE id = ?", ord.ProductId).Scan(&quantity).Error; err != nil {
+			return err
+		}
+		ord.Stock += quantity
+		if err := db.DB.Exec("UPDATE products SET stock = ? WHERE id = ?", ord.Stock, ord.ProductId).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func PaymentMethodID(order_id int) (int, error) {
+	var pymt int
+	if err := db.DB.Raw("SELECT payment_method_id FROM orders WHERE id = ?", order_id).Scan(&pymt).Error; err != nil {
+		return 0, err
+	}
+	return pymt, nil
+}
+
+func OrderExist(orderID int) error {
+	if err := db.DB.Raw("SELECT id FROM orders WHERE id = ?", orderID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateOrder(order_id int) error {
+	if err := db.DB.Exec("UPDATE orders SET shipment_status = 'prcessing' WHERE id = ?", order_id).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
