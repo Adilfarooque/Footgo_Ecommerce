@@ -221,3 +221,17 @@ func UpdateOrder(order_id int) error {
 	return nil
 }
 
+func GetAllPaymentOption(userID int) ([]models.PaymentDetails, error) {
+	var fullpaymentDetails []models.PaymentDetails
+	var paymentMethods []models.PaymentDetail
+	if err := db.DB.Raw("SELECT * FROM payment_method").Scan(&paymentMethods).Error; err != nil {
+		return []models.PaymentDetails{}, err
+	}
+	var a float64
+	if err := db.DB.Raw("SELECT amount FROM wallets WHERE user_id = ?", userID).Scan(&a).Error; err != nil {
+		return []models.PaymentDetails{}, err
+	}
+	fullpaymentDetails = append(fullpaymentDetails, models.PaymentDetails{PaymentDetail: paymentMethods, WallectAmount: a})
+
+	return fullpaymentDetails, nil
+}

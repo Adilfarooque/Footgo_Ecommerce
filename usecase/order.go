@@ -101,7 +101,7 @@ func ExecutePurchaseCOD(orderID int) error {
 		return errors.New("item placed, cannot pay")
 	}
 	if shipmentStatus == "cancelled" || shipmentStatus == "returned" || shipmentStatus == "return" {
-		message := fmt.Sprintf(shipmentStatus)
+		message := fmt.Sprint(shipmentStatus)
 		return errors.New("the order is in " + message + "so can't paid")
 	}
 	if shipmentStatus == "processing" {
@@ -112,3 +112,30 @@ func ExecutePurchaseCOD(orderID int) error {
 	}
 	return nil
 }
+
+func CheckOut(userID int) (models.CheckoutDetails, error) {
+	allUserAddress, err := repository.GetAllAddress(userID)
+	if err != nil {
+		return models.CheckoutDetails{}, err
+	}
+	paymentDetails, err := repository.GetAllPaymentOption(userID)
+	if err != nil {
+		return models.CheckoutDetails{}, err
+	}
+	cartItems, err := repository.DisplayCart(userID)
+	if err != nil {
+		return models.CheckoutDetails{}, err
+	}
+	grandTotal, err := repository.GetTotalPrice(userID)
+	if err != nil {
+		return models.CheckoutDetails{}, err
+	}
+	return models.CheckoutDetails{
+		AddressInfoResponse: allUserAddress,
+		Payment_Method:      paymentDetails,
+		Cart:                cartItems,
+		Total_Price:         grandTotal.FinalPrice,
+	}, nil
+
+}
+

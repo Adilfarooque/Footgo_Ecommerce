@@ -84,8 +84,8 @@ type PaymentDetails struct {
 type CheckoutDetails struct {
 	AddressInfoResponse []AddressInfoResponse
 	Payment_Method      []PaymentDetails
-	//Cart                []Cart
-	Total_Price float64
+	Cart                []Cart
+	Total_Price         float64
 }
 type ChangePassword struct {
 	Oldpassword string `json:"old_password"`

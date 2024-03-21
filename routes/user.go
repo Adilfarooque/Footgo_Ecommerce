@@ -58,7 +58,11 @@ func UserRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 			order.GET("/place-order", handlers.PlaceOrderCOD)
 		}
 
-		
+		checkout := r.Group("/checkout")
+		{
+			checkout.GET("",handlers.CheckOut)
+			
+		}		
 	}
 	return r
 }

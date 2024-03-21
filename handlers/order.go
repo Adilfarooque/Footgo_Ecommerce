@@ -192,24 +192,46 @@ func PlaceOrderCOD(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, errs)
 		return
 	}
-	paymentMethod , err := usecase.PaymentMethodID(order_id)
-	if err != nil{
-		errs := response.ClientResponse(http.StatusInternalServerError,"error from paymentId",nil,err.Error())
-		c.JSON(http.StatusInternalServerError,errs)
+	paymentMethod, err := usecase.PaymentMethodID(order_id)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "error from paymentId", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
 		return
 	}
-	if paymentMethod == 1{
-		if	err := usecase.ExecutePurchaseCOD(order_id);err != nil{
-			errs := response.ClientResponse(http.StatusInternalServerError,"error in cash on delivery",nil,err.Error())
-			c.JSON(http.StatusBadRequest,errs)
+	if paymentMethod == 1 {
+		if err := usecase.ExecutePurchaseCOD(order_id); err != nil {
+			errs := response.ClientResponse(http.StatusInternalServerError, "error in cash on delivery", nil, err.Error())
+			c.JSON(http.StatusBadRequest, errs)
 			return
 		}
-		success := response.ClientResponse(http.StatusOK,"Placed Order with cash on delivery",nil,nil)
-		c.JSON(http.StatusOK,success)
+		success := response.ClientResponse(http.StatusOK, "Placed Order with cash on delivery", nil, nil)
+		c.JSON(http.StatusOK, success)
 	}
 	if paymentMethod == 2 {
-		link := fmt.Sprintf("http://localhost:8000/user/razorpay?order_id=%d",order_id)
-		success := response.ClientResponse(http.StatusOK,"Placed order with razor pay following link",link,nil)
-		c.JSON(http.StatusOK,success)
+		link := fmt.Sprintf("http://localhost:8000/user/razorpay?order_id=%d", order_id)
+		success := response.ClientResponse(http.StatusOK, "Placed order with razor pay following link", link, nil)
+		c.JSON(http.StatusOK, success)
 	}
+}
+
+// @Summary		Checkout section
+// @Description	Add products to carts  for the purchase
+// @Tags			User Order Management
+// @Accept			json
+// @Produce		    json
+// @Security		Bearer
+// @Success		200	{object}	response.Response{}
+// @Failure		500	{object}	response.Response{}
+// @Router			/user/checkout    [GET]
+
+func CheckOut(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	checkoutDetails, err := usecase.CheckOut(userID.(int))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "failed to retrive details", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Checkout page loaded successfully", checkoutDetails, nil)
+	c.JSON(http.StatusOK, success)
 }
