@@ -27,10 +27,13 @@ func ConnectDatabase(confg config.Config) (*gorm.DB, error) {
 	db.AutoMigrate(&domain.Coupons{})
 	db.AutoMigrate(&domain.ProductOffer{})
 	db.AutoMigrate(&domain.CategoryOffer{})
+	db.AutoMigrate(&domain.Referral{})
 	db.AutoMigrate(&domain.Address{})
 	db.AutoMigrate(&domain.WishList{})
 	db.AutoMigrate(&domain.Cart{})
 	db.AutoMigrate(&domain.Orders{})
+	db.AutoMigrate(&domain.WalletHistory{})
+	db.AutoMigrate(&domain.Wallet{})
 
 	return DB, err
 }

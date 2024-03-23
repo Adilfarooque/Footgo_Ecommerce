@@ -224,7 +224,7 @@ func UpdateOrder(order_id int) error {
 func GetAllPaymentOption(userID int) ([]models.PaymentDetails, error) {
 	var fullpaymentDetails []models.PaymentDetails
 	var paymentMethods []models.PaymentDetail
-	if err := db.DB.Raw("SELECT * FROM payment_method").Scan(&paymentMethods).Error; err != nil {
+	if err := db.DB.Raw("SELECT * FROM payment_methods").Scan(&paymentMethods).Error; err != nil {
 		return []models.PaymentDetails{}, err
 	}
 	var a float64
@@ -235,3 +235,4 @@ func GetAllPaymentOption(userID int) ([]models.PaymentDetails, error) {
 
 	return fullpaymentDetails, nil
 }
+
