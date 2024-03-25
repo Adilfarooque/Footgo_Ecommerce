@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
 	"github.com/Adilfarooque/Footgo_Ecommerce/repository"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
+	"github.com/jinzhu/copier"
 )
 
 func GetAllOrderDetailsForAdmin(page, pageSize int) ([]models.CombainedOrderDetails, error) {
@@ -139,3 +141,95 @@ func CheckOut(userID int) (models.CheckoutDetails, error) {
 
 }
 
+func OrderItemsFromCart(orderFromCart models.OrderFromCart, userID int) (domain.OrderSuccessResponse, error) {
+	var orderBody models.OrederIncoming
+	if err := copier.Copy(&orderBody, &orderFromCart); err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+	orderBody.UserID = userID
+	cartExist, err := repository.DoesCartExist(userID)
+	if err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+	if !cartExist {
+		return domain.OrderSuccessResponse{}, errors.New("cart empty can't order")
+	}
+
+	addressExist, err := repository.AddressExist(orderBody)
+	if err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+	if !addressExist {
+		return domain.OrderSuccessResponse{}, errors.New("address does not exist")
+	}
+
+	paymentExist, err := repository.PaymentExist(orderBody)
+	if err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+	if !paymentExist {
+		return domain.OrderSuccessResponse{}, errors.New("payment method doesn't exist")
+	}
+
+	cartItems, err := repository.GetAllItemsFromCart(orderBody.UserID)
+	if err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+
+	total, err := repository.TotalAmountInCart(orderBody.UserID)
+	if err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+
+	discount_price, err := repository.GetCouponDiscountPrice(int(orderBody.UserID), total)
+	if err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+
+	if err := repository.UpdateCouponDetails(discount_price, orderBody.UserID); err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+
+	FinalPrice := total - discount_price
+	if orderBody.PaymentID == 3 {
+		walletAmount, err := repository.WalletAmount(userID)
+		if err != nil {
+			return domain.OrderSuccessResponse{}, err
+		}
+		if FinalPrice >= walletAmount {
+			return domain.OrderSuccessResponse{}, errors.New("this much of amount not available in wallet")
+		}
+	}
+
+	order_id, err := repository.OrderItems(orderBody, FinalPrice)
+	if err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+	if orderBody.PaymentID == 3 {
+		if err := repository.UpdateWalletAfterOrder(userID, FinalPrice); err != nil {
+			return domain.OrderSuccessResponse{}, err
+		}
+		reason := "Amount debited for purchasing products"
+		if err := repository.UpdateHistoryForDebit(userID, order_id, FinalPrice, reason); err != nil {
+			return domain.OrderSuccessResponse{}, err
+		}
+	}
+	if err := repository.AddOrderProducts(order_id, cartItems); err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+	orderSuccessResponse, err := repository.GetBriefOrderDetails(order_id, orderBody.PaymentID)
+	if err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+	var orderItemDetails domain.OrderItem
+	for _, c := range cartItems {
+		orderItemDetails.ProductID = c.ProductID
+		orderItemDetails.Quantity = c.Quantity
+		err := repository.UpdateCartAfterOrder(userID, int(orderItemDetails.ProductID), orderItemDetails.Quantity)
+		if err != nil {
+			return domain.OrderSuccessResponse{}, err
+		}
+	}
+	return orderSuccessResponse, nil
+
+}

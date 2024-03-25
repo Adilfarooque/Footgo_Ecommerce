@@ -186,3 +186,36 @@ func EmptyCart(userID int) error {
 	}
 	return nil
 }
+
+func GetAllItemsFromCart(userID int) ([]models.Cart, error) {
+	var count int
+	var cartResponse []models.Cart
+	err := db.DB.Raw("SELECT COUNT(*) FROM carts WHERE user_id = ?", userID).Scan(&count).Error
+	if err != nil {
+		return []models.Cart{}, err
+	}
+	if count == 0 {
+		return []models.Cart{}, nil
+	}
+	err = db.DB.Raw("SELECT carts.user_id,users.firstname as user_name,carts.product_id,products.name as product_name,carts.quantity,carts.total_price from carts INNER JOIN users on carts.user_id = users.id INNER JOIN products ON carts.product_id = products.id where user_id = ?", userID).First(&cartResponse).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if len(cartResponse) == 0 {
+				return []models.Cart{}, nil
+			}
+			return []models.Cart{}, err
+		}
+		return []models.Cart{}, err
+	}
+	return cartResponse, nil
+}
+
+func OrderItems(ob models.OrederIncoming, price float64) (int, error) {
+	var id int
+	query := `
+    INSERT INTO orders (created_at , user_id , address_id , payment_method_id , final_price)
+    VALUES (NOW(),?, ?, ?, ?)
+    RETURNING id`
+	db.DB.Raw(query, ob.UserID, ob.AddressID, ob.PaymentID, price).Scan(&id)
+	return id, nil
+}

@@ -20,6 +20,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		users := r.Group("/users")
 		{
 			users.GET("", handlers.GetUsers)
+			users.GET("/user",handlers.GetUserByID)
 			users.PUT("/blocked", handlers.BlockedUser)
 			users.PUT("/Unblock", handlers.UnBlockUser)
 		}

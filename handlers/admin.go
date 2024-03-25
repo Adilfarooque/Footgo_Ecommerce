@@ -290,3 +290,32 @@ func DeletePaymentMethod(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Successfully Deleted the PaymentMethod", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
+
+// @Summary		Get User
+// @Description	Retrieve users with pagination
+// @Tags			Admin User Management
+// @Accept			json
+// @Produce		    json
+// @Security		Bearer
+// @Param			id	query	string	true	"id"
+// @Success		200		{object}	response.Response{}
+// @Failure		500		{object}	response.Response{}
+// @Router			/admin/users/user   [GET]
+
+//Get User By ID
+func GetUserByID(c *gin.Context) {
+	id := c.Query("id")
+	if id == "" {
+		errRes := response.ClientResponse(http.StatusBadRequest, "User ID is required", nil, "")
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	user, err := usecase.GetUserByID2(id)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Error retrieving user", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully retrieved user", user, nil)
+	c.JSON(http.StatusOK, success)
+}

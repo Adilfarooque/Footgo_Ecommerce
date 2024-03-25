@@ -2,6 +2,8 @@ package repository
 
 import (
 	"github.com/Adilfarooque/Footgo_Ecommerce/db"
+	"github.com/Adilfarooque/Footgo_Ecommerce/domain"
+	"github.com/Adilfarooque/Footgo_Ecommerce/helper"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 )
 
@@ -236,3 +238,132 @@ func GetAllPaymentOption(userID int) ([]models.PaymentDetails, error) {
 	return fullpaymentDetails, nil
 }
 
+func DoesCartExist(userID int) (bool, error) {
+	var exist bool
+	if err := db.DB.Raw("SELECT exists(SELECT 1 FROM carts WHERE user_id = ?)", userID).Scan(&exist).Error; err != nil {
+		return false, err
+	}
+	return exist, nil
+}
+
+func AddressExist(orderBody models.OrederIncoming) (bool, error) {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM addresses WHERE user_id = ? AND id = ?", orderBody.UserID).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func PaymentExist(orderBody models.OrederIncoming) (bool, error) {
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM payment_status WHERE id = ?", orderBody.PaymentID).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func TotalAmountInCart(userID int) (float64, error) {
+	var price float64
+	if err := db.DB.Raw("SELECT SUM(total_price) FROM carts WHERE  user_id= $1", userID).Scan(&price).Error; err != nil {
+		return 0, err
+	}
+	return price, nil
+}
+
+func GetCouponDiscountPrice(UserID int, Total float64) (float64, error) {
+	discountPrice, err := helper.GetCouponDiscountPrice(UserID, Total, db.DB)
+	if err != nil {
+		return 0.0, err
+	}
+
+	return discountPrice, nil
+
+}
+
+func UpdateCouponDetails(discount_price float64, UserID int) error {
+
+	if discount_price != 0.0 {
+		err := db.DB.Exec("update used_coupons set used = true where user_id = ?", UserID).Error
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func WalletAmount(userID int) (float64, error) {
+	var a float64
+	err := db.DB.Raw("SELECT amount FROM wallets WHERE user_id = $1", userID).Scan(&a).Error
+	if err != nil {
+		return 0.0, err
+	}
+	return a, nil
+}
+
+func UpdateWalletAfterOrder(userID int, amount float64) error {
+	err := db.DB.Exec("UPDATE wallets SET amount = amount - ? WHERE user_id = ?", amount, userID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
+func UpdateHistoryForDebit(userID, orderID int, amount float64, reason string) error {
+	err := db.DB.Exec("INSERT INTO wallet_histories (user_id ,order_id ,description ,amount) VALUES (?,?,?,?)", userID, orderID, reason, amount).Error
+	if err != nil {
+		return err
+	}
+	err = db.DB.Exec("UPDATE wallet_histories SET is_credited = 'false' where user_id = ? AND order_id = ?", userID, orderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func AddOrderProducts(order_id int, cart []models.Cart) error {
+	query := `
+    INSERT INTO order_items (order_id,product_id,quantity,total_price)
+    VALUES (?, ?, ?, ?) `
+	for _, v := range cart {
+		var productID int
+		if err := db.DB.Raw("SELECT id FROM products WHERE name = $1", v.ProductName).Scan(&productID).Error; err != nil {
+			return err
+		}
+		if err := db.DB.Exec(query, order_id, productID, v.Quantity, v.TotalPrice).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func GetBriefOrderDetails(orderID, paymentID int) (domain.OrderSuccessResponse, error) {
+	if paymentID == 3 {
+		err := db.DB.Exec("UPDATE orders SET shipment_status ='processing' , payment_status ='paid' WHERE id = ?", orderID).Error
+		if err != nil {
+			return domain.OrderSuccessResponse{}, err
+
+		}
+	}
+	var orderSuccessResponse domain.OrderSuccessResponse
+	err := db.DB.Raw(`SELECT id as order_id,shipment_status FROM orders WHERE id = ?`, orderID).Scan(&orderSuccessResponse).Error
+	if err != nil {
+		return domain.OrderSuccessResponse{}, err
+	}
+
+	return orderSuccessResponse, nil
+}
+
+func UpdateCartAfterOrder(userID, productID int, quantity float64) error {
+	err := db.DB.Exec("DELETE FROM carts WHERE user_id = ? and product_id = ?", userID, productID).Error
+	if err != nil {
+		return err
+	}
+
+	err = db.DB.Exec("UPDATE products SET stock = stock - ? WHERE id = ?", quantity, productID).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

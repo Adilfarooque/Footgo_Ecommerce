@@ -237,7 +237,7 @@ func UpdateUserDetails(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, errs)
 		return
 	}
-	success := response.ClientResponse(http.StatusOK, "Updated User Details", UpdateUserDetails, err.Error())
+	success := response.ClientResponse(http.StatusOK, "Updated User Details", UpdateUserDetails, nil)
 
 	c.JSON(http.StatusOK, success)
 }
@@ -269,4 +269,3 @@ func ChangePassword(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "Password changed successfully", nil, nil)
 	c.JSON(http.StatusOK, success)
 }
-

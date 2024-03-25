@@ -157,7 +157,7 @@ func ShowAllUsers(page, count int) ([]models.UserDetailsAtAdmin, error) {
 		page = 1
 	}
 	offset := (page - 1) * count
-	err := db.DB.Raw("SELECT id, firstname, lastname, email, phone, blocked FROM users WHERE isadmin = 'false' LIMIT ? OFFSET ?", count, offset).Scan(&users).Error
+	err := db.DB.Raw("SELECT id, firstname, email FROM users WHERE isadmin = 'false' LIMIT ? OFFSET ?", count, offset).Scan(&users).Error
 	if err != nil {
 		return nil, err
 	}
@@ -209,18 +209,17 @@ func UpdateBlockedUserByID(user domain.User) error {
 }
 
 func ShowAllProductsFromAdmin(page, count int) ([]models.ProductBreif, error) {
-    if page == 0 {
-        page = 1
-    }
-    offset := (page - 1) * count
-    var productBriefs []models.ProductBreif
-    err := db.DB.Raw("SELECT * FROM products LIMIT ? OFFSET ?", count, offset).Scan(&productBriefs).Error
-    if err != nil {
-        return nil, err
-    }
-    return productBriefs, nil
+	if page == 0 {
+		page = 1
+	}
+	offset := (page - 1) * count
+	var productBriefs []models.ProductBreif
+	err := db.DB.Raw("SELECT * FROM products LIMIT ? OFFSET ?", count, offset).Scan(&productBriefs).Error
+	if err != nil {
+		return nil, err
+	}
+	return productBriefs, nil
 }
-
 
 func CheckifPaymentMethodAlreadyExists(payment string) (bool, error) {
 	var count int64
@@ -264,4 +263,35 @@ func DeletePaymentMethod(id int) error {
 		return err
 	}
 	return nil
+}
+
+// func GetUserByID2(id int) (domain.User, error) {
+// 	var user domain.User
+
+// 	if err := db.DB.Raw("SELECT * FROM users WHERE id = ?",id).Scan(&user).Error; err != nil {
+// 		return domain.User{}, err
+// 	}
+// 	return user, nil
+// }
+
+func GetUserByID2(id string) (models.UserDetailsAtAdmin, error) {
+	user_id, err := strconv.Atoi(id)
+	if err != nil {
+		return models.UserDetailsAtAdmin{}, err
+	}
+
+	var count int
+	if err := db.DB.Raw("SELECT COUNT(*) FROM users WHERE id = ?", user_id).Scan(&count).Error; err != nil {
+		return models.UserDetailsAtAdmin{}, err
+	}
+
+	if count < 1 {
+		return models.UserDetailsAtAdmin{}, errors.New("user for the given id does not exist")
+	}
+
+	var userDetails models.UserDetailsAtAdmin
+	if err := db.DB.Raw("SELECT * FROM users WHERE id = ?", user_id).Scan(&userDetails).Error; err != nil {
+		return models.UserDetailsAtAdmin{}, err
+	}
+	return userDetails, nil
 }

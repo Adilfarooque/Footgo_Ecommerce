@@ -231,3 +231,11 @@ func DeletePaymentMethod(id int) error {
 	}
 	return nil
 }
+
+func GetUserByID2(id string) (models.UserDetailsAtAdmin, error) {
+	user, err := repository.GetUserByID2(id)
+	if err != nil {
+		return models.UserDetailsAtAdmin{}, err
+	}
+	return user, nil
+}

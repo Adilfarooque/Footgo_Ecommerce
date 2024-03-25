@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Adilfarooque/Footgo_Ecommerce/usecase"
+	"github.com/Adilfarooque/Footgo_Ecommerce/utils/models"
 	"github.com/Adilfarooque/Footgo_Ecommerce/utils/response"
 	"github.com/gin-gonic/gin"
 )
@@ -234,4 +235,36 @@ func CheckOut(c *gin.Context) {
 	}
 	success := response.ClientResponse(http.StatusOK, "Checkout page loaded successfully", checkoutDetails, nil)
 	c.JSON(http.StatusOK, success)
+}
+
+// @Summary Order Items from cart
+// @Description Order all products which is currently present inside  the cart
+// @Tags User Order Management
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param orderBody body models.OrderFromCart true "Order details"
+// @Success 200 {object} response.Response{}
+// @Failure 500 {object} response.Response{}
+// @Router /user/checkout    [POST]
+
+func OrderItemsFromCart(c *gin.Context) {
+	id, _ := c.Get("user_id")
+	userID := id.(int)
+	var orderFromCart models.OrderFromCart
+	if err := c.ShouldBindJSON(&orderFromCart); err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Bad request", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+
+	orderSuccessResponse, err := usecase.OrderItemsFromCart(orderFromCart, userID)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "Could not do the order", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully created the order", orderSuccessResponse, nil)
+	c.JSON(http.StatusOK, success)
+
 }
